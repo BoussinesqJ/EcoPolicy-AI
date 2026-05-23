@@ -1,0 +1,28 @@
+name: 恩施州
+aliases: ["恩施", "enshi"]
+parent_province: "湖北省"
+
+sources:
+  - name: "恩施州人民政府"
+    url: "http://www.enshi.gov.cn/"
+    type: html
+    frequency: daily
+    selectors:
+      list: ".list-box li a, .list_content li a"
+    enabled: true
+
+  - name: "恩施州经信局"
+    url: "http://jxj.enshi.gov.cn/"
+    type: html
+    frequency: daily
+    selectors:
+      list: ".list_content li a, .news-list li a"
+    enabled: true
+
+  - name: "恩施州农业农村局"
+    url: "http://nync.enshi.gov.cn/"
+    type: html
+    frequency: daily
+    selectors:
+      list: ".list_content li a, .news-list li a"
+    enabled: true

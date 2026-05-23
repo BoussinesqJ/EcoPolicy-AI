@@ -1,0 +1,38 @@
+# ============================================================
+# EcoPolicy Agent System - 配置文件
+# ============================================================
+
+# -- 扫描设置 --
+scan:
+  regions: ["湖北", "恩施"]       # 扫描的省市地区
+  industries: null                # null = 所有产业; 或指定 "strategic_emerging" 等
+  min_priority: "P1"              # 只匹配 P0 和 P1 政策
+
+# -- 企业匹配设置 --
+matching:
+  min_recommendation_score: 3     # 匹配度 >= 3/5 才生成简报
+  auto_brief: true                # 自动为匹配结果生成简报
+  include_hard_failures: true     # 简报中包含未通过的硬性条件
+
+# -- 报告设置 --
+reports:
+  output_dir: "output/reports"
+  brief_filename_pattern: "{enterprise_id}_{policy_slug}_{date}_brief.md"
+
+# -- 通知设置 --
+notification:
+  console: true
+  file: true
+  file_dir: "output/alerts"
+  level: "p0_p1"                  # all | p0_only | p0_p1
+
+# -- 调度设置 --
+scheduler:
+  mode: "manual"                  # manual | apscheduler | windows_task
+  interval_hours: 24
+  scan_times: ["08:00"]           # 每天扫描时间
+
+# -- 日志 --
+logging:
+  level: "INFO"
+  format: "%(asctime)s [%(levelname)s] %(name)s - %(message)s"

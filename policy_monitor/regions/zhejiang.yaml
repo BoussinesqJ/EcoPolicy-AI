@@ -1,0 +1,44 @@
+name: 浙江省
+aliases: ["浙江", "浙", "zhejiang"]
+parent_province: null
+
+sources:
+  - name: "浙江省人民政府"
+    url: "https://www.zhejiang.gov.cn/col/col1229442013/index.html"
+    type: html
+    frequency: daily
+    selectors:
+      list: ".list_content li a, .news-list li a"
+    enabled: true
+
+  - name: "浙江省经信厅"
+    url: "https://jxt.zj.gov.cn/"
+    type: html
+    frequency: daily
+    selectors:
+      list: ".list_content li a, .news-list li a"
+    enabled: true
+
+  - name: "浙江省农业农村厅"
+    url: "https://nync.zj.gov.cn/"
+    type: html
+    frequency: daily
+    selectors:
+      list: ".list_content li a, .news-list li a"
+    enabled: true
+
+  - name: "浙江省科技厅"
+    url: "https://kjt.zj.gov.cn/"
+    type: html
+    frequency: daily
+    selectors:
+      list: ".list_content li a, .news-list li a"
+    enabled: true
+
+  - name: "浙江省财政厅"
+    url: "https://czt.zj.gov.cn/"
+    type: html
+    frequency: daily
+    selectors:
+      list: ".list_content li a, .news-list li a"
+    enabled: true

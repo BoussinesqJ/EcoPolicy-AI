@@ -1,0 +1,371 @@
+# ============================================================
+# 政策监控配置 v2.0
+# 策略：国务院API多关键词覆盖 + 已验证HTML源 + 省级源
+# 更新：2026-05-23 - 五大产业分类全覆盖
+# ============================================================
+
+sources:
+  # ============================================================
+  # A. 国务院政策文件库（核心源，覆盖所有部委政策）
+  # 通过不同关键词搜索，实现按部委/产业分类覆盖
+  # ============================================================
+
+  # A1. 全量政策（每次必跑）
+  - name: "国务院-政策文件库"
+    url: "https://sousuo.www.gov.cn/search-gov/data?t=zhengcelibrary_gwyzcwjk&q=&timetype=timeqb&mintime=&maxtime=&sort=pubtime&sortType=1&searchfield=title&p=0&n=20&inpro="
+    type: "api"
+    frequency: "daily"
+    enabled: true
+    note: "国务院政策文件库，全量政策"
+
+  # A2. 战略性新兴产业（九大领域 + 六大支柱）
+  - name: "国务院-战略性新兴产业"
+    url: "https://sousuo.www.gov.cn/search-gov/data?t=zhengcelibrary_gwyzcwjk&q=%E6%88%98%E7%95%A5%E6%80%A7%E6%96%B0%E5%85%B4%E4%BA%A7%E4%B8%9A&timetype=timeqb&sort=pubtime&sortType=1&searchfield=title&p=0&n=20"
+    type: "api"
+    frequency: "weekly"
+    enabled: true
+    note: "覆盖：新一代信息技术/新能源/新材料/高端装备/新能源汽车/绿色环保/航空航天/海洋装备/集成电路/生物医药/低空经济/新型储能/智能机器人"
+
+  # A3. 未来产业（六大方向）
+  - name: "国务院-未来产业"
+    url: "https://sousuo.www.gov.cn/search-gov/data?t=zhengcelibrary_gwyzcwjk&q=%E6%9C%AA%E6%9D%A5%E4%BA%A7%E4%B8%9A&timetype=timeqb&sort=pubtime&sortType=1&searchfield=title&p=0&n=20"
+    type: "api"
+    frequency: "weekly"
+    enabled: true
+    note: "覆盖：量子科技/生物制造/氢能/核聚变/脑机接口/具身智能/6G"
+
+  # A4. 传统制造业转型（十大重点稳增长行业）
+  - name: "国务院-制造业转型"
+    url: "https://sousuo.www.gov.cn/search-gov/data?t=zhengcelibrary_gwyzcwjk&q=%E5%88%B6%E9%80%A0%E4%B8%9A+%E8%BD%AC%E5%9E%8B&timetype=timeqb&sort=pubtime&sortType=1&searchfield=title&p=0&n=20"
+    type: "api"
+    frequency: "weekly"
+    enabled: true
+    note: "覆盖：石化/钢铁/有色/建材/机械/汽车/电力装备/轻工/电子信息/智能制造/技改"
+
+  # A5. 基础设施（六张网）
+  - name: "国务院-基础设施"
+    url: "https://sousuo.www.gov.cn/search-gov/data?t=zhengcelibrary_gwyzcwjk&q=%E5%9F%BA%E7%A1%80%E8%AE%BE%E6%96%BD&timetype=timeqb&sort=pubtime&sortType=1&searchfield=title&p=0&n=20"
+    type: "api"
+    frequency: "weekly"
+    enabled: true
+    note: "覆盖：水网/电网/算力网/新型通信网/城市地下管网/物流网"
+
+  # A6. 农业与种业（第一产业）
+  - name: "国务院-农业与种业"
+    url: "https://sousuo.www.gov.cn/search-gov/data?t=zhengcelibrary_gwyzcwjk&q=%E5%86%9C%E4%B8%9A+%E7%A7%8D%E4%B8%9A&timetype=timeqb&sort=pubtime&sortType=1&searchfield=title&p=0&n=20"
+    type: "api"
+    frequency: "weekly"
+    enabled: true
+    note: "覆盖：农业/种业/乡村振兴/粮食安全/生物育种/农机"
+
+  # A7. 生物医药
+  - name: "国务院-生物医药"
+    url: "https://sousuo.www.gov.cn/search-gov/data?t=zhengcelibrary_gwyzcwjk&q=%E7%94%9F%E7%89%A9%E5%8C%BB%E8%8D%AF&timetype=timeqb&sort=pubtime&sortType=1&searchfield=title&p=0&n=20"
+    type: "api"
+    frequency: "weekly"
+    enabled: true
+    note: "覆盖：生物医药/创新药/医疗器械/生物制品"
+
+  # A8. 新能源与储能
+  - name: "国务院-新能源储能"
+    url: "https://sousuo.www.gov.cn/search-gov/data?t=zhengcelibrary_gwyzcwjk&q=%E6%96%B0%E8%83%BD%E6%BA%90+%E5%82%A8%E8%83%BD&timetype=timeqb&sort=pubtime&sortType=1&searchfield=title&p=0&n=20"
+    type: "api"
+    frequency: "weekly"
+    enabled: true
+    note: "覆盖：新能源/储能/氢能/核能/电力/碳交易/绿证"
+
+  # A9. 数字经济
+  - name: "国务院-数字经济"
+    url: "https://sousuo.www.gov.cn/search-gov/data?t=zhengcelibrary_gwyzcwjk&q=%E6%95%B0%E5%AD%97%E7%BB%8F%E6%B5%8E&timetype=timeqb&sort=pubtime&sortType=1&searchfield=title&p=0&n=20"
+    type: "api"
+    frequency: "weekly"
+    enabled: true
+    note: "覆盖：数字经济/算力/数据要素/AI/工业互联网/5G/信创"
+
+  # A10. 中小企业与专精特新
+  - name: "国务院-中小企业"
+    url: "https://sousuo.www.gov.cn/search-gov/data?t=zhengcelibrary_gwyzcwjk&q=%E4%B8%AD%E5%B0%8F%E4%BC%81%E4%B8%9A&timetype=timeqb&sort=pubtime&sortType=1&searchfield=title&p=0&n=20"
+    type: "api"
+    frequency: "weekly"
+    enabled: true
+    note: "覆盖：中小企业/专精特新/融资/减税/创新/上市"
+
+  # A11. 专项资金与补贴
+  - name: "国务院-专项资金补贴"
+    url: "https://sousuo.www.gov.cn/search-gov/data?t=zhengcelibrary_gwyzcwjk&q=%E4%B8%93%E9%A1%B9%E8%B5%84%E9%87%91+%E8%A1%A5%E8%B4%B4&timetype=timeqb&sort=pubtime&sortType=1&searchfield=title&p=0&n=20"
+    type: "api"
+    frequency: "weekly"
+    enabled: true
+    note: "覆盖：专项资金/补贴/申报/产业基金/股权投资/拨改投"
+
+  # A12. 工信部政策（替代失效的HTML源）
+  - name: "国务院-工业和信息化"
+    url: "https://sousuo.www.gov.cn/search-gov/data?t=zhengcelibrary_gwyzcwjk&q=%E5%B7%A5%E4%B8%9A%E5%92%8C%E4%BF%A1%E6%81%AF%E5%8C%96&timetype=timeqb&sort=pubtime&sortType=1&searchfield=title&p=0&n=20"
+    type: "api"
+    frequency: "weekly"
+    enabled: true
+    note: "覆盖工信部政策：工业母机/首台套/智能制造/工业互联网/中小企业"
+
+  # A13. 发改委政策（替代失效的HTML源）
+  - name: "国务院-发展改革"
+    url: "https://sousuo.www.gov.cn/search-gov/data?t=zhengcelibrary_gwyzcwjk&q=%E5%8F%91%E5%B1%95%E6%94%B9%E9%9D%A9&timetype=timeqb&sort=pubtime&sortType=1&searchfield=title&p=0&n=20"
+    type: "api"
+    frequency: "weekly"
+    enabled: true
+    note: "覆盖发改委政策：产业规划/重大项目/价格改革/区域发展"
+
+  # A14. 能源政策（替代失效的能源局HTML源）
+  - name: "国务院-能源政策"
+    url: "https://sousuo.www.gov.cn/search-gov/data?t=zhengcelibrary_gwyzcwjk&q=%E8%83%BD%E6%BA%90&timetype=timeqb&sort=pubtime&sortType=1&searchfield=title&p=0&n=20"
+    type: "api"
+    frequency: "weekly"
+    enabled: true
+    note: "覆盖能源局政策：煤炭/石油/天然气/电力/核电/风电/光伏"
+
+  # A15. 住房建设（替代失效的住建部HTML源）
+  - name: "国务院-住房城乡建设"
+    url: "https://sousuo.www.gov.cn/search-gov/data?t=zhengcelibrary_gwyzcwjk&q=%E4%BD%8F%E6%88%BF%E5%9F%8E%E4%B9%A1%E5%BB%BA%E8%AE%BE&timetype=timeqb&sort=pubtime&sortType=1&searchfield=title&p=0&n=20"
+    type: "api"
+    frequency: "weekly"
+    enabled: true
+    note: "覆盖住建部政策：城市更新/建筑资质/房地产/保障房/管网改造"
+
+  # A16. 交通运输（替代失效的交通运输部HTML源）
+  - name: "国务院-交通运输"
+    url: "https://sousuo.www.gov.cn/search-gov/data?t=zhengcelibrary_gwyzcwjk&q=%E4%BA%A4%E9%80%9A%E8%BF%90%E8%BE%93&timetype=timeqb&sort=pubtime&sortType=1&searchfield=title&p=0&n=20"
+    type: "api"
+    frequency: "weekly"
+    enabled: true
+    note: "覆盖交通运输部政策：公路/铁路/水运/民航/物流/低空经济"
+
+  # A17. 商务政策（替代失效的商务部HTML源）
+  - name: "国务院-商务外贸"
+    url: "https://sousuo.www.gov.cn/search-gov/data?t=zhengcelibrary_gwyzcwjk&q=%E5%95%86%E5%8A%A1+%E5%A4%96%E8%B4%B8&timetype=timeqb&sort=pubtime&sortType=1&searchfield=title&p=0&n=20"
+    type: "api"
+    frequency: "weekly"
+    enabled: true
+    note: "覆盖商务部政策：外贸/自贸区/跨境电商/服务贸易/RCEP"
+
+  # A18. 水利政策（替代失效的水利部HTML源）
+  - name: "国务院-水利政策"
+    url: "https://sousuo.www.gov.cn/search-gov/data?t=zhengcelibrary_gwyzcwjk&q=%E6%B0%B4%E5%88%A9&timetype=timeqb&sort=pubtime&sortType=1&searchfield=title&p=0&n=20"
+    type: "api"
+    frequency: "weekly"
+    enabled: true
+    note: "覆盖水利部政策：南水北调/防洪/灌溉/水网建设/河湖治理"
+
+  # A19. 国防科工（航空航天/海洋装备）
+  - name: "国务院-国防科工"
+    url: "https://sousuo.www.gov.cn/search-gov/data?t=zhengcelibrary_gwyzcwjk&q=%E5%9B%BD%E9%98%B2%E7%A7%91%E5%B7%A5&timetype=timeqb&sort=pubtime&sortType=1&searchfield=title&p=0&n=20"
+    type: "api"
+    frequency: "weekly"
+    enabled: true
+    note: "覆盖：航空航天/军民融合/国防科技/卫星/船舶/海洋装备"
+
+  # A20. 生态环保（补充生态环境部HTML源）
+  - name: "国务院-生态环保"
+    url: "https://sousuo.www.gov.cn/search-gov/data?t=zhengcelibrary_gwyzcwjk&q=%E7%94%9F%E6%80%81%E7%8E%AF%E4%BF%9D&timetype=timeqb&sort=pubtime&sortType=1&searchfield=title&p=0&n=20"
+    type: "api"
+    frequency: "weekly"
+    enabled: true
+    note: "覆盖：碳达峰/碳中和/污染防治/生态修复/环保督察/碳交易"
+
+  # ============================================================
+  # B. 已验证的 HTML 源（直接抓取，数据质量好）
+  # ============================================================
+  - name: "生态环境部"
+    url: "https://www.mee.gov.cn/ywgz/fgbz/fl/"
+    type: "html"
+    frequency: "weekly"
+    selectors:
+      list: ".list_content li a"
+    enabled: true
+    note: "覆盖：生态修复/污染治理/碳交易/环保标准"
+
+  - name: "自然资源部"
+    url: "https://www.mnr.gov.cn/dt/ywbb/"
+    type: "html"
+    frequency: "weekly"
+    selectors:
+      list: ".list_content li a"
+    enabled: true
+    note: "覆盖：矿产资源/土地管理/测绘/海洋/地质"
+
+  - name: "财政部"
+    url: "https://www.mof.gov.cn/zhengwuxinxi/zhengcefabu/"
+    type: "html"
+    frequency: "weekly"
+    selectors:
+      list: ".xwlb_box li a, .clist li a"
+    enabled: true
+    note: "覆盖：财政政策/税收优惠/专项债/政府采购/转移支付"
+
+  - name: "应急管理部"
+    url: "https://www.mem.gov.cn/gk/gwgg/index.shtml"
+    type: "html"
+    frequency: "weekly"
+    selectors:
+      list: ".list_content li a"
+    enabled: true
+    note: "覆盖：安全生产/危化品/矿山安全/消防/应急救援"
+
+  - name: "科技部"
+    url: "https://www.most.gov.cn/xxgk/xinxifenlei/fdzdgknr/fgzc/gfxwj/index.html"
+    type: "html"
+    frequency: "weekly"
+    selectors:
+      list: ".list_content li a, .trs_paper_default14 li a"
+    enabled: true
+    note: "覆盖：科技政策/创新基金/高新技术企业/科技成果转化"
+
+# ============================================================
+# 关键词配置（覆盖五大产业分类核心术语）
+# ============================================================
+global_keywords:
+  # 高优先级：命中一个 +3 分（标题命中 +6 分）
+  high_priority:
+    # 资金/项目类
+    - "专项资金"
+    - "补贴"
+    - "申报"
+    - "试点"
+    - "拨改投"
+    - "产业基金"
+    - "股权投资"
+    - "首台套"
+    - "首批次"
+    # 战略性新兴产业
+    - "集成电路"
+    - "低空经济"
+    - "新型储能"
+    - "智能机器人"
+    - "人工智能"
+    - "量子"
+    - "氢能"
+    - "碳纤维"
+    # 生物/种业
+    - "生物育种"
+    - "种业振兴"
+    - "粮食安全"
+    # 高端制造
+    - "专精特新"
+    - "智能制造"
+    - "工业母机"
+    # 数字经济
+    - "算力"
+    - "数据要素"
+    - "东数西算"
+    # 新兴支柱产业
+    - "生物医药"
+    - "航空航天"
+    - "具身智能"
+    - "6G"
+    - "脑机接口"
+    - "生物制造"
+
+  # 中优先级：命中一个 +1 分（标题命中 +2 分）
+  medium_priority:
+    # 通用政策术语
+    - "认定"
+    - "扶持"
+    - "奖励"
+    - "示范"
+    - "创新平台"
+    - "产业链"
+    - "中小企业"
+    - "高新技术企业"
+    # 战略性新兴产业
+    - "新能源"
+    - "新材料"
+    - "高端装备"
+    - "航空航天"
+    - "海洋装备"
+    - "生物医药"
+    - "绿色环保"
+    - "新能源汽车"
+    - "工业互联网"
+    - "5G"
+    - "芯片"
+    # 传统制造业
+    - "技改"
+    - "石化"
+    - "钢铁"
+    - "有色"
+    - "建材"
+    - "机械"
+    - "汽车"
+    - "电力装备"
+    # 基础设施
+    - "水利"
+    - "电网"
+    - "物流"
+    - "交通"
+    - "算力网"
+    - "数据中心"
+    - "城市更新"
+    - "管网"
+    # 三次产业
+    - "农业"
+    - "服务业"
+    - "消费"
+    - "乡村振兴"
+    - "制造业"
+    - "建筑业"
+    - "数字经济"
+    # 能源
+    - "煤炭"
+    - "石油"
+    - "天然气"
+    - "核电"
+    - "风电"
+    - "光伏"
+    # 外贸
+    - "外贸"
+    - "自贸区"
+    - "跨境电商"
+    # 环保
+    - "碳达峰"
+    - "碳中和"
+    - "污染防治"
+    - "生态修复"
+
+  # 观察级：命中仅记录，不加分
+  watch:
+    - "产业规划"
+    - "监管"
+    - "合规"
+    - "准入"
+    - "标准"
+    - "安全"
+    - "环保"
+    - "碳排放"
+
+# ============================================================
+# 地区配置
+# ============================================================
+regions:
+  dir: regions
+  default: null
+  include_national: true
+
+# ============================================================
+# 安全策略
+# ============================================================
+safety:
+  min_delay_seconds: 30
+  max_delay_seconds: 60
+  max_pages_per_source: 2
+  respect_robots: true
+  timeout_seconds: 15
+  max_retries: 2
+  user_agents:
+    - "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36"
+    - "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:126.0) Gecko/20100101 Firefox/126.0"
+    - "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36 Edg/125.0.0.0"
+
+# ============================================================
+# 评分阈值
+# ============================================================
+scoring:
+  p0_threshold: 6
+  p1_threshold: 3

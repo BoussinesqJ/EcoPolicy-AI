@@ -1,0 +1,44 @@
+name: 海南省
+aliases: ["海南", "琼", "hainan"]
+parent_province: null
+
+sources:
+  - name: 海南省人民政府
+    url: http://www.hainan.gov.cn/hainan/zfwj/list3.shtml
+    type: html
+    frequency: daily
+    selectors:
+      list: ".news-list li a, .list-box li a, .u-list li a"
+    enabled: true
+
+  - name: 海南省工信厅
+    url: https://gxt.hainan.gov.cn/
+    type: html
+    frequency: daily
+    selectors:
+      list: ".list_content li a, .news-list li a, ul.list li a"
+    enabled: true
+
+  - name: 海南省农业农村厅
+    url: https://nync.hainan.gov.cn/
+    type: html
+    frequency: daily
+    selectors:
+      list: ".list_content li a, .news-list li a, ul.list li a"
+    enabled: true
+
+  - name: 海南省科技厅
+    url: https://kst.hainan.gov.cn/
+    type: html
+    frequency: daily
+    selectors:
+      list: ".list_content li a, .news-list li a, ul.list li a"
+    enabled: true
+
+  - name: 海南省财政厅
+    url: https://czt.hainan.gov.cn/
+    type: html
+    frequency: daily
+    selectors:
+      list: ".list_content li a, .news-list li a, ul.list li a"
+    enabled: true

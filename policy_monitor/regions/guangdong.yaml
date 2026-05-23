@@ -1,0 +1,44 @@
+name: 广东省
+aliases: ["广东", "粤", "guangdong"]
+parent_province: null
+
+sources:
+  - name: "广东省人民政府"
+    url: "https://www.gd.gov.cn/zwgk/zcjd/"
+    type: html
+    frequency: daily
+    selectors:
+      list: ".list_content li a, .news-list li a"
+    enabled: true
+
+  - name: "广东省工信厅"
+    url: "https://gdii.gd.gov.cn/"
+    type: html
+    frequency: daily
+    selectors:
+      list: ".list_content li a, .news-list li a"
+    enabled: true
+
+  - name: "广东省农业农村厅"
+    url: "https://nync.gd.gov.cn/"
+    type: html
+    frequency: daily
+    selectors:
+      list: ".list_content li a, .news-list li a"
+    enabled: true
+
+  - name: "广东省科技厅"
+    url: "https://std.gd.gov.cn/"
+    type: html
+    frequency: daily
+    selectors:
+      list: ".list_content li a, .news-list li a"
+    enabled: true
+
+  - name: "广东省财政厅"
+    url: "https://czt.gd.gov.cn/"
+    type: html
+    frequency: daily
+    selectors:
+      list: ".list_content li a, .news-list li a"
+    enabled: true

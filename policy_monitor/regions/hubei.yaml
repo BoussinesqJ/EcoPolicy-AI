@@ -1,0 +1,52 @@
+name: 湖北省
+aliases: ["湖北", "鄂", "hubei"]
+parent_province: null
+
+sources:
+  - name: "湖北省人民政府"
+    url: "http://www.hubei.gov.cn/zcwj/zcjd/"
+    type: html
+    frequency: daily
+    selectors:
+      list: ".list-box li a, .list_content li a"
+    enabled: true
+
+  - name: "湖北省经信厅"
+    url: "https://jxt.hubei.gov.cn/fbjd/zc/"
+    type: html
+    frequency: daily
+    selectors:
+      list: ".list_content li a, .news-list li a"
+    enabled: true
+
+  - name: "湖北省农业农村厅"
+    url: "http://nync.hubei.gov.cn/"
+    type: html
+    frequency: daily
+    selectors:
+      list: ".list_content li a, .news-list li a"
+    enabled: true
+
+  - name: "湖北省科技厅"
+    url: "https://kjt.hubei.gov.cn/"
+    type: html
+    frequency: daily
+    selectors:
+      list: ".list_content li a, .news-list li a"
+    enabled: true
+
+  - name: "湖北省财政厅"
+    url: "http://czt.hubei.gov.cn/"
+    type: html
+    frequency: daily
+    selectors:
+      list: ".list_content li a, .news-list li a"
+    enabled: true
+
+  - name: "湖北省发改委"
+    url: "http://fgw.hubei.gov.cn/"
+    type: html
+    frequency: daily
+    selectors:
+      list: ".list_content li a, .news-list li a"
+    enabled: true

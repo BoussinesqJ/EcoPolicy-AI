@@ -1,0 +1,178 @@
+# ========================================================
+# 经济政策智能分析系统 — 企业画像标准化模板
+# EcoPolicy AI - Company Profile Template
+# ========================================================
+# 使用说明：
+#   1. 复制本文件，重命名为 {企业简称}_profile.yaml
+#   2. 按照下方注释逐项填写（标注 [必填] 的必须填写）
+#   3. 未标注 [必填] 的项，留空或填 null 即可
+#   4. 填写完成后交给 AI 助手，系统将自动建立企业画像
+# ========================================================
+
+# --------------------------------------------------------
+# 一、基本信息 [必填]
+# --------------------------------------------------------
+basic_info:
+  company_name: ""              # [必填] 企业全称（与营业执照一致）
+  short_name: ""                # [必填] 企业简称（用于报告标题）
+  unified_credit_code: ""       # 统一社会信用代码（18位）
+  registered_capital: 0         # [必填] 注册资本（单位：万元）
+  paid_in_capital: 0            # 实缴资本（单位：万元）
+  establishment_date: ""        # 成立日期（格式：YYYY-MM-DD）
+  registered_address: ""        # [必填] 注册地址（精确到市/区）
+  actual_address: ""            # 实际办公地址
+  employee_count: 0             # 员工总数
+  legal_representative: ""      # 法定代表人
+  contact_person: ""            # 政策申报联系人
+  contact_phone: ""             # 联系电话
+
+# --------------------------------------------------------
+# 二、行业与业务 [必填]
+# --------------------------------------------------------
+industry:
+  primary_sector: ""            # [必填] 主营业务所属大类
+                                # 可选：农业/制造业/数字经济/新能源/生物医药/新材料/
+                                #       现代服务业/建筑业/交通运输/文化教育/其他
+  sub_sector: ""                # [必填] 细分行业
+                                # 示例：种业/半导体/新能源汽车/人工智能/创新药等
+  industry_keywords: []         # [必填] 行业关键词（3-8个，用于政策匹配）
+                                # 示例：["生物育种", "玉米", "高新技术", "南繁硅谷"]
+  business_scope: ""            # 主营业务描述（100字以内）
+  main_products: []             # 主要产品/服务列表
+                                # 示例：
+                                #   - "杂交玉米种子（高产/高蛋白/鲜食型）"
+                                #   - "杂交水稻种子"
+  market_coverage: []           # 市场覆盖区域
+                                # 示例：["西南", "黄淮海", "西北", "非洲"]
+
+# --------------------------------------------------------
+# 三、资质与荣誉
+# --------------------------------------------------------
+qualifications:
+  high_tech_enterprise: false   # 是否为国家高新技术企业
+  sme_specialized: false        # 是否为专精特新企业
+  sme_specialized_level: ""     # 专精特新等级：国家级/省级/市级
+  gazelle_enterprise: false     # 是否为瞪羚企业
+  unicorn_enterprise: false     # 是否为独角兽企业
+  listed: false                 # 是否上市/挂牌
+  listing_board: ""             # 上市板块：主板/创业板/科创板/北交所/新三板/区域股交/其他
+  listing_code: ""              # 股票代码/挂牌代码
+  iso_certifications: []        # ISO认证列表
+                                # 示例：["ISO9001", "ISO14001", "ISO45001"]
+  other_qualifications: []      # 其他资质
+                                # 示例：["育繁推一体化", "博士后创新基地", "工程技术研究中心"]
+
+# --------------------------------------------------------
+# 四、创新与知识产权
+# --------------------------------------------------------
+innovation:
+  rd_investment_ratio: 0.0      # 研发投入占营收比例（%）
+  rd_personnel_count: 0         # 研发人员数量
+  invention_patents: 0          # 发明专利数量
+  utility_patents: 0            # 实用新型专利数量
+  design_patents: 0             # 外观设计专利数量
+  software_copyrights: 0        # 软件著作权数量
+  provincial_acchievements: 0   # 省级科技成果数量
+  local_standards: 0            # 主导/参与制定的地方标准数量
+  industry_standards: 0         # 行业标准数量
+  national_standards: 0         # 国家标准数量
+  approved_varieties: 0         # 审定品种数量（农业专用，其他行业填0）
+  research_platforms: []        # 科研平台列表
+                                # 示例：
+                                #   - "湖北省博士后创新基地"
+                                #   - "南繁硅谷海南科创中心"
+  cooperation_partners: []      # 合作院所/高校
+                                # 示例：["中国农科院", "华中农业大学"]
+
+# --------------------------------------------------------
+# 五、生产与资产
+# --------------------------------------------------------
+production:
+  production_bases: []          # 生产基地列表
+                                # 示例：
+                                #   - name: "恩施制种基地"
+                                #     area_mu: 4000
+                                #     location: "湖北恩施"
+  total_land_area: 0            # 总占地面积（亩）
+  annual_production_capacity: ""  # 年产能描述
+  supply_chain_description: ""  # 供应链概述（上下游各3个核心客户/供应商）
+
+# --------------------------------------------------------
+# 六、财务概况（近3年）
+# --------------------------------------------------------
+financials:
+  # 填写最近3个完整年度数据（单位：万元）
+  # 如果某年数据不可用，填 null
+  year_1:                       # 最近一年
+    year: 2025
+    total_assets: null
+    total_liabilities: null
+    revenue: null
+    net_profit: null
+    tax_paid: null
+  year_2:
+    year: 2024
+    total_assets: null
+    total_liabilities: null
+    revenue: null
+    net_profit: null
+    tax_paid: null
+  year_3:
+    year: 2023
+    total_assets: null
+    total_liabilities: null
+    revenue: null
+    net_profit: null
+    tax_paid: null
+
+# --------------------------------------------------------
+# 七、区域布局
+# --------------------------------------------------------
+regions:
+  headquarters: ""              # [必填] 总部所在省/市
+  branch_offices: []            # 分公司/办事处所在地
+  production_locations: []      # 生产基地所在地
+  target_markets: []            # 目标市场区域
+  overseas_markets: []          # 海外市场
+
+# --------------------------------------------------------
+# 八、社会价值与 ESG
+# --------------------------------------------------------
+social_value:
+  employment_impact: 0          # 直接/间接带动就业人数
+  farmer_beneficiaries: 0       # 带动农户数量（农业专用）
+  poverty_relief: false         # 是否参与乡村振兴/扶贫
+  environmental_measures: []    # 环保措施
+  social_responsibility: []     # 其他社会责任
+
+# --------------------------------------------------------
+# 九、战略方向
+# --------------------------------------------------------
+strategy:
+  short_term_goals: []          # 近期战略目标（1-2年）
+  medium_term_goals: []         # 中期战略目标（3-5年）
+  key_challenges: []            # 当前面临的核心挑战
+  policy_needs: []              # 企业最需要的政策支持类型
+                                # 可选：资金补贴/税收优惠/用地支持/人才引进/
+                                #       市场准入/融资渠道/技术合作/品牌推广
+
+# --------------------------------------------------------
+# 十、资本状态（如适用）
+# --------------------------------------------------------
+capital:
+  current_stage: ""             # 当前资本阶段
+                                # 可选：初创/成长/Pre-IPO/上市
+  investors: []                 # 现有投资方
+  latest_valuation: null        # 最新估值（万元，如有）
+  ipo_plan: ""                  # IPO 计划
+                                # 可选：无计划/筹备中/已申报/已上市
+  target_board: ""              # 目标上市板块
+
+# ========================================================
+# [系统自动生成区域 — 以下字段由 AI 助手填写，用户无需填写]
+# ========================================================
+# profile_version: "1.0"
+# generated_date: "YYYY-MM-DD"
+# match_tags: []          # AI 根据画像自动提取的政策匹配关键词
+# risk_flags: []          # AI 识别的潜在风险标记
+# ========================================================

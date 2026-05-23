@@ -1,0 +1,437 @@
+# ============================================================
+# 产业分类配置
+# 基于国家统计局《工业战略性新兴产业分类目录（2023）》
+# 五大产业分类 + 对应政府部门 + 关键词体系
+# ============================================================
+
+# --------------------------------------------------
+# 一、战略性新兴产业与新兴支柱产业
+# --------------------------------------------------
+strategic_emerging:
+  name: "战略性新兴产业与新兴支柱产业"
+  description: "国家政策重点支持和加速发展的核心板块，培育壮大新动能"
+  subcategories:
+
+    # 九大战略性新兴产业
+    next_gen信息技术:
+      name: "新一代信息技术"
+      keywords_high:
+        - "集成电路"
+        - "芯片"
+        - "半导体"
+        - "人工智能"
+        - "大数据"
+        - "云计算"
+        - "工业互联网"
+        - "5G"
+        - "工业软件"
+        - "信创"
+        - "操作系统"
+      keywords_medium:
+        - "信息技术"
+        - "数字经济"
+        - "信息化"
+        - "网络安全"
+        - "数据要素"
+        - "算力"
+      departments:
+        - "工信部"
+        - "科技部"
+
+    生物技术:
+      name: "生物技术"
+      keywords_high:
+        - "生物育种"
+        - "种业振兴"
+        - "基因编辑"
+        - "合成生物学"
+        - "生物制造"
+        - "生物农药"
+        - "生物肥料"
+      keywords_medium:
+        - "生物技术"
+        - "生命科学"
+        - "农业生物"
+      departments:
+        - "科技部"
+        - "农业农村部"
+
+    新能源:
+      name: "新能源"
+      keywords_high:
+        - "光伏"
+        - "风电"
+        - "氢能"
+        - "新型储能"
+        - "核能"
+        - "生物质能"
+        - "地热能"
+        - "充电桩"
+        - "换电站"
+      keywords_medium:
+        - "新能源"
+        - "清洁能源"
+        - "可再生能源"
+        - "碳达峰"
+        - "碳中和"
+        - "绿电"
+      departments:
+        - "国家能源局"
+        - "发改委"
+
+    新材料:
+      name: "新材料"
+      keywords_high:
+        - "碳纤维"
+        - "石墨烯"
+        - "稀土材料"
+        - "半导体材料"
+        - "电池材料"
+        - "高性能钢铁"
+        - "特种合金"
+        - "3D打印材料"
+      keywords_medium:
+        - "新材料"
+        - "先进材料"
+        - "复合材料"
+        - "功能性材料"
+      departments:
+        - "工信部"
+        - "科技部"
+
+    高端装备:
+      name: "高端装备"
+      keywords_high:
+        - "工业母机"
+        - "高端数控机床"
+        - "工业机器人"
+        - "智能机器人"
+        - "航空发动机"
+        - "重型装备"
+        - "精密仪器"
+      keywords_medium:
+        - "高端装备"
+        - "智能制造"
+        - "装备制造业"
+        - "首台套"
+      departments:
+        - "工信部"
+        - "发改委"
+
+    新能源汽车:
+      name: "新能源汽车"
+      keywords_high:
+        - "新能源汽车"
+        - "动力电池"
+        - "固态电池"
+        - "智能网联"
+        - "自动驾驶"
+        - "车规芯片"
+        - "换电模式"
+      keywords_medium:
+        - "汽车"
+        - "电动化"
+        - "智能驾驶"
+        - "汽车下乡"
+      departments:
+        - "工信部"
+        - "发改委"
+
+    绿色环保:
+      name: "绿色环保"
+      keywords_high:
+        - "生态修复"
+        - "污染治理"
+        - "碳交易"
+        - "碳捕集"
+        - "固废处理"
+        - "污水处理"
+        - "大气治理"
+      keywords_medium:
+        - "环保"
+        - "绿色"
+        - "低碳"
+        - "循环经济"
+        - "清洁生产"
+      departments:
+        - "生态环境部"
+        - "发改委"
+
+    航空航天:
+      name: "航空航天"
+      keywords_high:
+        - "商业航天"
+        - "卫星"
+        - "火箭"
+        - "低轨星座"
+        - "航空装备"
+        - "无人机"
+      keywords_medium:
+        - "航空航天"
+        - "航天科技"
+        - "航空工业"
+        - "通航"
+      departments:
+        - "工信部"
+        - "国防科工局"
+
+    海洋装备:
+      name: "海洋装备"
+      keywords_high:
+        - "海洋工程装备"
+        - "深海装备"
+        - "海洋牧场"
+        - "海上风电安装"
+      keywords_medium:
+        - "海洋经济"
+        - "海洋资源"
+        - "蓝色经济"
+      departments:
+        - "自然资源部"
+        - "工信部"
+
+  # 六大新兴支柱产业（发改委重点）
+  pillar_industries:
+    - name: "集成电路"
+      keywords_high: ["集成电路", "芯片", "EDA", "光刻", "封测"]
+    - name: "航空航天"
+      keywords_high: ["商业航天", "卫星", "低空经济", "eVTOL", "飞行汽车"]
+    - name: "生物医药"
+      keywords_high: ["创新药", "生物医药", "细胞治疗", "基因治疗", "医疗器械", "中药现代化"]
+    - name: "低空经济"
+      keywords_high: ["低空经济", "无人机", "eVTOL", "飞行汽车", "空中交通", "通用航空"]
+    - name: "新型储能"
+      keywords_high: ["新型储能", "锂电", "钠电", "液流电池", "压缩空气储能", "飞轮储能"]
+    - name: "智能机器人"
+      keywords_high: ["人形机器人", "智能机器人", "协作机器人", "服务机器人", "特种机器人"]
+
+# --------------------------------------------------
+# 二、未来产业（前瞻布局）
+# --------------------------------------------------
+future_industries:
+  name: "未来产业"
+  description: "处于技术突破前夜，代表明天支柱产业方向的先导性产业"
+  subcategories:
+
+    量子科技:
+      keywords_high: ["量子计算", "量子通信", "量子传感", "量子芯片", "量子纠错"]
+      keywords_medium: ["量子", "量子信息"]
+      departments: ["科技部"]
+
+    生物制造:
+      keywords_high: ["合成生物", "生物制造", "细胞工厂", "生物基材料", "生物能源"]
+      keywords_medium: ["生物制造", "合成生物学"]
+      departments: ["科技部", "工信部"]
+
+    绿色氢能和核聚变能:
+      keywords_high: ["氢能", "绿氢", "氢燃料电池", "核聚变", "可控核聚变"]
+      keywords_medium: ["氢能源", "聚变能"]
+      departments: ["国家能源局", "科技部"]
+
+    脑机接口:
+      keywords_high: ["脑机接口", "脑电信号", "神经调控", "脑植入"]
+      keywords_medium: ["神经科学", "脑科学"]
+      departments: ["科技部"]
+
+    具身智能:
+      keywords_high: ["具身智能", "人形机器人", "多模态大模型", "物理AI"]
+      keywords_medium: ["具身智能", "物理智能"]
+      departments: ["科技部", "工信部"]
+
+    6G:
+      keywords_high: ["6G", "太赫兹", "空天地一体化", "卫星互联网"]
+      keywords_medium: ["下一代通信", "新一代移动通信"]
+      departments: ["工信部"]
+
+# --------------------------------------------------
+# 三、传统制造业与重点稳增长行业
+# --------------------------------------------------
+traditional_manufacturing:
+  name: "传统制造业与重点稳增长行业"
+  description: "现代化产业体系的基底，侧重高端化、智能化、绿色化转型"
+  subcategories:
+
+    石化化工:
+      keywords_high: ["石化", "化工", "精细化工", "新材料化工", "煤化工"]
+      keywords_medium: ["石化产业", "化工园区", "危化品"]
+      departments: ["工信部", "应急管理部"]
+
+    钢铁:
+      keywords_high: ["钢铁", "特钢", "钢铁兼并重组", "电炉炼钢"]
+      keywords_medium: ["钢铁行业", "粗钢"]
+      departments: ["工信部"]
+
+    有色:
+      keywords_high: ["有色金属", "稀土", "锂", "铜", "铝"]
+      keywords_medium: ["有色行业", "矿产"]
+      departments: ["工信部", "自然资源部"]
+
+    建材:
+      keywords_high: ["建材", "水泥", "玻璃", "陶瓷"]
+      keywords_medium: ["建材行业", "绿色建材"]
+      departments: ["工信部"]
+
+    机械:
+      keywords_high: ["机械", "工程机械", "农机", "仪器仪表"]
+      keywords_medium: ["机械行业", "装备制造"]
+      departments: ["工信部"]
+
+    轻工纺织:
+      keywords_high: ["消费品", "纺织", "家电", "食品加工"]
+      keywords_medium: ["轻工", "纺织", "消费品工业"]
+      departments: ["工信部"]
+
+  # 十大重点稳增长行业
+  stable_growth:
+    - "钢铁"
+    - "有色金属"
+    - "石化"
+    - "化工"
+    - "建材"
+    - "机械"
+    - "汽车"
+    - "电力装备"
+    - "轻工"
+    - "电子信息制造业"
+
+# --------------------------------------------------
+# 四、基础设施产业（六张网）
+# --------------------------------------------------
+infrastructure:
+  name: "基础设施产业"
+  description: "为产业发展和民生提供能源、数据和运输支撑的基础设施网络"
+  subcategories:
+
+    水网:
+      keywords_high: ["水利", "水网", "灌区", "防洪", "水库"]
+      keywords_medium: ["水资源", "水治理", "水生态"]
+      departments: ["水利部"]
+
+    电网:
+      keywords_high: ["电网", "特高压", "配电网", "智能电网", "虚拟电厂"]
+      keywords_medium: ["电力", "输配电", "电力改革"]
+      departments: ["国家能源局"]
+
+    算力网:
+      keywords_high: ["算力", "数据中心", "智算中心", "东数西算", "边缘计算"]
+      keywords_medium: ["算力网络", "算力基础设施"]
+      departments: ["工信部", "发改委"]
+
+    新型通信网:
+      keywords_high: ["5G基站", "光纤", "通信网络", "物联网"]
+      keywords_medium: ["通信", "信息基础设施", "网络覆盖"]
+      departments: ["工信部"]
+
+    城市地下管网:
+      keywords_high: ["城市更新", "地下管网", "老旧小区", "综合管廊"]
+      keywords_medium: ["市政基础设施", "城市基础设施"]
+      departments: ["住建部"]
+
+    物流网:
+      keywords_high: ["物流", "多式联运", "冷链物流", "快递", "枢纽"]
+      keywords_medium: ["交通运输", "货运", "物流成本"]
+      departments: ["交通运输部", "发改委"]
+
+# --------------------------------------------------
+# 五、宏观三次产业
+# --------------------------------------------------
+three_industries:
+  name: "国民经济三次产业分类"
+  description: "宏观经济统计分类"
+
+  第一产业:
+    keywords_high: ["农业", "种业", "粮食安全", "耕地", "乡村振兴", "高标准农田"]
+    keywords_medium: ["林业", "牧业", "渔业", "农产品", "农村", "农机"]
+    departments: ["农业农村部", "国家林草局"]
+
+  第二产业:
+    keywords_high: ["工业", "制造业", "建筑业"]
+    keywords_medium: ["采矿业", "电力", "燃气", "自来水"]
+    departments: ["工信部", "住建部"]
+
+  第三产业:
+    keywords_high: ["服务业", "金融", "旅游", "教育", "医疗", "物流"]
+    keywords_medium: ["消费", "零售", "文化", "体育", "养老"]
+    departments: ["发改委", "商务部", "文旅部"]
+
+# ============================================================
+# 部门 - 数据源映射（供 config.yaml 扩展参考）
+# ============================================================
+department_sources:
+  # 已验证可用
+  国务院:
+    type: "api"
+    url: "https://sousuo.www.gov.cn/search-gov/data?t=zhengcelibrary_gwyzcwjk&q=&timetype=timeqb&mintime=&maxtime=&sort=pubtime&sortType=1&searchfield=title&pcodeJig498=&childtype=&subchildtype=&tsbq=&pubtimeyear=&puborg=&pcodeJig498=&pcodeJiguan=&searchfield=title&p=0&n=20&inpro="
+    status: "verified"
+
+  科技部:
+    type: "html"
+    url: "https://www.most.gov.cn/xxgk/xinxifenlei/fdzdgknr/fgzc/gfxwj/index.html"
+    status: "verified"
+
+  财政部:
+    type: "html"
+    url: "https://www.mof.gov.cn/zhengwuxinxi/zhengcefabu/"
+    status: "verified"
+
+  # 需验证/待启用
+  工信部:
+    type: "html"
+    url: "https://www.miit.gov.cn/zwgk/zcwj/wjfb/index.html"
+    status: "js_rendered"
+    note: "需 JS 渲染，暂不可用"
+
+  国家能源局:
+    type: "html"
+    url: "https://www.nea.gov.cn/xwzx/nyyw/index.html"
+    status: "untested"
+
+  自然资源部:
+    type: "html"
+    url: "https://www.mnr.gov.cn/dt/ywbb/"
+    status: "untested"
+
+  生态环境部:
+    type: "html"
+    url: "https://www.mee.gov.cn/ywgz/fgbz/fl/"
+    status: "untested"
+
+  住建部:
+    type: "html"
+    url: "https://www.mohurd.gov.cn/xinwen/gzdt/index.html"
+    status: "untested"
+
+  水利部:
+    type: "html"
+    url: "https://www.mwr.gov.cn/xw/tytz/index.html"
+    status: "untested"
+
+  交通运输部:
+    type: "html"
+    url: "https://www.mot.gov.cn/jiaotongyaowen/"
+    status: "untested"
+
+  商务部:
+    type: "html"
+    url: "https://www.mofcom.gov.cn/article/xwfb/"
+    status: "untested"
+
+  国家卫健委:
+    type: "html"
+    url: "http://www.nhc.gov.cn/xcs/yqtb/list.shtml"
+    status: "untested"
+
+  国家市场监管总局:
+    type: "html"
+    url: "https://www.samr.gov.cn/xw/zj/art/2024/"
+    status: "untested"
+
+  国家药监局:
+    type: "html"
+    url: "https://www.nmpa.gov.cn/yaopin/yaopingonggao/index.html"
+    status: "untested"
+
+  国家林草局:
+    type: "html"
+    url: "https://www.forestry.gov.cn/c/zfxxgkfp/fgwj/gz/index.html"
+    status: "untested"

@@ -1,0 +1,38 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+venv/
+.venv/
+
+# IDE
+.vscode/
+.idea/
+
+# Runtime output
+output/
+policy_data/
+*.db
+*.db-journal
+memory/
+.workbuddy/
+*.log
+
+# Test files (keep in dev, exclude from release)
+test_*.py
+*_test.py
+source_test_results.*
+
+# Company-specific (private data, not for public repo)
+*.docx
+*.doc
+*.pdf
+company_profile.txt
+*_profile.yaml
+!enterprises/_template/profile.yaml
+
+# OS
+.DS_Store
+Thumbs.db
