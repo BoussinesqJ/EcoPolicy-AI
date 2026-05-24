@@ -40,7 +40,8 @@
 3. **多维拆解**：运行 PolicyMatch Matrix 四维评分
 4. **赛道设计**：推荐 1-3 条申报/利用路径，附对比表
 5. **行动清单**：P0（本周）/ P1（2-4 周）/ P2（持续）分级
-6. **深度报告**（按需）：申报指南/退出方案/可研大纲
+6. **深度报告**（按需）：申报草稿/退出方案/可研大纲
+   - 申报草稿：参考 `config/application_draft_guide.md`，按政策类型生成标准化申报材料
 
 ---
 
@@ -64,6 +65,7 @@ EcoPolicy-AI/
 ├── config/                      框架配置（参考用）
 │   ├── company_profile_template.yaml    企业画像模板
 │   ├── policy_matrix_generator.md       行业分析框架
+│   ├── application_draft_guide.md       申报材料生成指南
 │   └── output_standards.md              输出规范
 ├── policy_monitor/              政策抓取工具（Python）
 │   ├── main.py                  CLI 入口
@@ -73,8 +75,10 @@ EcoPolicy-AI/
 ├── enterprises/                 企业画像库
 │   └── {企业简称}/
 │       └── profile.yaml         企业画像
-├── enterprise_matcher.py        企业匹配引擎（7 个行业维度）
+├── enterprise_matcher.py        企业匹配引擎（8 个行业维度）
 ├── report_generator.py          报告生成器（简报 + 深度分析模板）
+├── batch_matcher.py             批量匹配引擎（多企业 x 全量政策）
+├── policy_tracker.py            政策历史版本追踪（变更检测 + 对比报告）
 ├── examples/                    脱敏示例
 ├── README.md / ROADMAP.md       文档
 └── security_review.py           安全审查脚本
@@ -101,13 +105,23 @@ EcoPolicy-AI/
 → 多维度对比表
 ```
 
-### 3. 新企业建档
+### 3. 生成申报材料
+
+```
+用户："帮我根据这个政策写一份申报草稿"
+→ 读取政策要求 + 企业画像 + 申报指南模板
+→ 生成标准化申报草稿（含表格/段落/材料清单）
+用户："核心竞争力那段帮我改一下"
+→ 基于企业画像数据重写
+```
+
+### 4. 新企业建档
 
 1. 复制 `enterprises/_template/profile.yaml`
 2. 填入企业数据（参考 `config/company_profile_template.yaml` 维度）
 3. 放入 `enterprises/{企业简称}/` 目录
 
-### 4. 批量政策扫描
+### 5. 批量政策扫描
 
 ```bash
 # 全国级别（37 个源）
@@ -120,11 +134,35 @@ python main.py run --region 湖北
 python main.py run --industry strategic_emerging
 ```
 
-### 5. 运行企业匹配
+### 6. 批量匹配（多企业 x 全量政策）
 
 ```bash
-python enterprise_matcher.py --enterprise enterprises/{企业简称}/profile.yaml
+# 全量批量匹配，生成排行榜报告
+python batch_matcher.py
+
+# 指定企业
+python batch_matcher.py --enterprise jyuh
+
+# 只看高分匹配（>= 9 分，即 3/5 以上）
+python batch_matcher.py --min-score 9
 ```
+
+输出：`policy_data/reports/batch_match_report_YYYY-MM-DD.md`
+
+### 7. 政策变更追踪
+
+```bash
+# 记录当前快照 + 检测变更
+python policy_tracker.py record
+
+# 查看未通知的变更
+python policy_tracker.py changes
+
+# 生成变更对比报告
+python policy_tracker.py report
+```
+
+输出：`policy_data/reports/policy_changes_YYYY-MM-DD.md`
 
 ---
 
@@ -148,7 +186,7 @@ python enterprise_matcher.py --enterprise enterprises/{企业简称}/profile.yam
 
 ### 行业分析维度（7 个）
 
-种业 / 制造业 / 数字经济 / 新能源 / 生物医药 / 新材料 / 轻资产
+种业 / 制造业 / 数字经济 / 新能源 / 生物医药 / 新材料 / 煤炭能源 / 轻资产
 
 ---
 
@@ -159,8 +197,11 @@ python enterprise_matcher.py --enterprise enterprises/{企业简称}/profile.yam
 | `config/company_profile_template.yaml` | 企业画像模板 | 新企业建档时 |
 | `config/policy_matrix_generator.md` | 行业分析框架 | 分析政策时参考四维要素 |
 | `config/output_standards.md` | 输出格式与排版规范 | 生成报告时参考 |
-| `enterprise_matcher.py` | 匹配引擎（含 7 个行业维度关键词） | 需要程序化匹配时 |
+| `config/application_draft_guide.md` | 申报材料生成指南（按政策类型分类） | 用户要求生成申报材料时 |
+| `enterprise_matcher.py` | 匹配引擎（含 8 个行业维度关键词） | 需要程序化匹配时 |
 | `report_generator.py` | 报告模板（简报 + 深度分析） | 生成结构化简报时 |
+| `batch_matcher.py` | 批量匹配（多企业 x 全量政策排行榜） | 生成全局匹配汇总时 |
+| `policy_tracker.py` | 政策变更追踪（快照/对比/变更报告） | 监控政策修订变化时 |
 
 ---
 

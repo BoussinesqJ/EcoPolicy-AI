@@ -35,12 +35,12 @@
 - [x] 移除未使用的解析器（rss_parser + sitemap_parser）
 - [x] 增强 CLAUDE.md（吸收 agent config + 使用指南 + 安全规则）
 
-## Phase 3：Agent 增强 [进行中]
+## Phase 3：Agent 增强 [已完成]
 
 - [x] 多轮对话支持（context.py + chat.py，已实现）
-- [ ] 申报草稿自动生成（可研报告大纲等）
-- [ ] 批量匹配（一个企业同时匹配多条政策，按优先级排序）
-- [ ] 政策历史版本对比与变化追踪
+- [x] 申报草稿自动生成（模板化框架 + 脱敏示例）
+- [x] 批量匹配（batch_matcher.py：多企业 x 全量政策排行榜 + 汇总报告）
+- [x] 政策历史版本对比（policy_tracker.py：快照追踪 + 变更检测 + 对比报告）
 
 ## Phase 4：界面与 API [计划中]
 
