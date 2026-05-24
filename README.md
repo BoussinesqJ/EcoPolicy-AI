@@ -1,6 +1,6 @@
-# 经济政策智能分析系统 (EcoPolicy AI)
+# 经济政策分析专家系统 (EcoPolicy AI)
 
-> 为任意企业/行业提供精准的政策匹配、机遇识别与行动建议的 AI 分析平台。
+> AI Agent + 行业知识库 + 政策数据库 = 对话式专家系统。为任意企业/行业提供精准的政策匹配、机遇识别与行动建议。
 
 [![Python 3.12+](https://img.shields.io/badge/Python-3.12+-blue.svg)](https://python.org)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
