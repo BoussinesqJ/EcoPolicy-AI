@@ -37,6 +37,7 @@ strategic_emerging:
       departments:
         - "工信部"
         - "科技部"
+        - "国家数据局"
 
     生物技术:
       name: "生物技术"
@@ -55,6 +56,8 @@ strategic_emerging:
       departments:
         - "科技部"
         - "农业农村部"
+        - "国家药监局"
+        - "国家医保局"
 
     新能源:
       name: "新能源"
@@ -352,7 +355,7 @@ three_industries:
   第三产业:
     keywords_high: ["服务业", "金融", "旅游", "教育", "医疗", "物流"]
     keywords_medium: ["消费", "零售", "文化", "体育", "养老"]
-    departments: ["发改委", "商务部", "文旅部"]
+    departments: ["发改委", "商务部", "文旅部", "国家医保局", "人社部", "证监会"]
 
 # ============================================================
 # 部门 - 数据源映射（供 config.yaml 扩展参考）
@@ -435,3 +438,33 @@ department_sources:
     type: "html"
     url: "https://www.forestry.gov.cn/c/zfxxgkfp/fgwj/gz/index.html"
     status: "untested"
+
+  国家医保局:
+    type: "api"
+    url: "通过国务院API覆盖"
+    status: "verified"
+    note: "通过国务院-医疗保障API源覆盖"
+
+  国家数据局:
+    type: "api"
+    url: "通过国务院API覆盖"
+    status: "verified"
+    note: "通过国务院-数据治理API源覆盖"
+
+  人社部:
+    type: "api"
+    url: "通过国务院API覆盖"
+    status: "verified"
+    note: "通过国务院-人力资源API源覆盖"
+
+  证监会:
+    type: "api"
+    url: "通过国务院API覆盖"
+    status: "verified"
+    note: "通过国务院-资本市场API源覆盖"
+
+  知识产权局:
+    type: "api"
+    url: "通过国务院API覆盖"
+    status: "verified"
+    note: "通过国务院-知识产权API源覆盖"

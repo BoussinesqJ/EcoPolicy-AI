@@ -170,6 +170,70 @@ sources:
     enabled: true
     note: "覆盖：碳达峰/碳中和/污染防治/生态修复/环保督察/碳交易"
 
+  # A21. 药品监管（药监局）
+  - name: "国务院-药品监管"
+    url: "https://sousuo.www.gov.cn/search-gov/data?t=zhengcelibrary_gwyzcwjk&q=%E8%8D%AF%E5%93%81+%E7%9B%91%E7%AE%A1&timetype=timeqb&sort=pubtime&sortType=1&searchfield=title&p=0&n=20"
+    type: "api"
+    frequency: "weekly"
+    enabled: true
+    note: "覆盖药监局政策：药品审批/医疗器械/临床试验/MAH/药品安全"
+
+  # A22. 医疗保障（医保局）
+  - name: "国务院-医疗保障"
+    url: "https://sousuo.www.gov.cn/search-gov/data?t=zhengcelibrary_gwyzcwjk&q=%E5%8C%BB%E7%96%97%E4%BF%9D%E9%9A%9C&timetype=timeqb&sort=pubtime&sortType=1&searchfield=title&p=0&n=20"
+    type: "api"
+    frequency: "weekly"
+    enabled: true
+    note: "覆盖医保局政策：医保目录/集采/DRG/DIP/长护险/医保支付"
+
+  # A23. 数据治理（数据局）
+  - name: "国务院-数据治理"
+    url: "https://sousuo.www.gov.cn/search-gov/data?t=zhengcelibrary_gwyzcwjk&q=%E6%95%B0%E6%8D%AE%E8%A6%81%E7%B4%A0+%E5%85%AC%E5%85%B1%E6%95%B0%E6%8D%AE&timetype=timeqb&sort=pubtime&sortType=1&searchfield=title&p=0&n=20"
+    type: "api"
+    frequency: "weekly"
+    enabled: true
+    note: "覆盖数据局政策：数据要素/公共数据开放/数据安全/数字政府/数据资产"
+
+  # A24. 卫生健康（卫健委）
+  - name: "国务院-卫生健康"
+    url: "https://sousuo.www.gov.cn/search-gov/data?t=zhengcelibrary_gwyzcwjk&q=%E5%8D%AB%E7%94%9F%E5%81%A5%E5%BA%B7&timetype=timeqb&sort=pubtime&sortType=1&searchfield=title&p=0&n=20"
+    type: "api"
+    frequency: "weekly"
+    enabled: true
+    note: "覆盖卫健委政策：医疗服务/公共卫生/中医药/分级诊疗"
+
+  # A25. 市场监管（市场监管总局）
+  - name: "国务院-市场监管"
+    url: "https://sousuo.www.gov.cn/search-gov/data?t=zhengcelibrary_gwyzcwjk&q=%E5%B8%82%E5%9C%BA%E7%9B%91%E7%AE%A1&timetype=timeqb&sort=pubtime&sortType=1&searchfield=title&p=0&n=20"
+    type: "api"
+    frequency: "weekly"
+    enabled: true
+    note: "覆盖市场监管总局政策：质量标准/认证认可/食品安全/反垄断"
+
+  # A26. 人力资源与人才（人社部）
+  - name: "国务院-人力资源"
+    url: "https://sousuo.www.gov.cn/search-gov/data?t=zhengcelibrary_gwyzcwjk&q=%E4%BA%BA%E6%89%8D+%E5%B0%B1%E4%B8%9A&timetype=timeqb&sort=pubtime&sortType=1&searchfield=title&p=0&n=20"
+    type: "api"
+    frequency: "weekly"
+    enabled: true
+    note: "覆盖人社部政策：人才政策/就业/社保/技能人才"
+
+  # A27. 资本市场（证监会）
+  - name: "国务院-资本市场"
+    url: "https://sousuo.www.gov.cn/search-gov/data?t=zhengcelibrary_gwyzcwjk&q=%E8%82%A1%E7%A5%A8+IPO+%E4%B8%8A%E5%B8%82&timetype=timeqb&sort=pubtime&sortType=1&searchfield=title&p=0&n=20"
+    type: "api"
+    frequency: "weekly"
+    enabled: true
+    note: "覆盖证监会政策：IPO/注册制/再融资/并购重组"
+
+  # A28. 知识产权（知识产权局）
+  - name: "国务院-知识产权"
+    url: "https://sousuo.www.gov.cn/search-gov/data?t=zhengcelibrary_gwyzcwjk&q=%E7%9F%A5%E8%AF%86%E4%BA%A7%E6%9D%83&timetype=timeqb&sort=pubtime&sortType=1&searchfield=title&p=0&n=20"
+    type: "api"
+    frequency: "weekly"
+    enabled: true
+    note: "覆盖知识产权局政策：专利/商标/知识产权保护/EDV/种业知识产权"
+
   # ============================================================
   # B. 已验证的 HTML 源（直接抓取，数据质量好）
   # ============================================================
@@ -262,6 +326,14 @@ global_keywords:
     - "6G"
     - "脑机接口"
     - "生物制造"
+    # 药监局/医保局/数据局/知识产权
+    - "医保目录"
+    - "药品集采"
+    - "创新药审批"
+    - "公共数据"
+    - "数据安全"
+    - "数据资产"
+    - "知识产权"
 
   # 中优先级：命中一个 +1 分（标题命中 +2 分）
   medium_priority:
@@ -328,6 +400,22 @@ global_keywords:
     - "碳中和"
     - "污染防治"
     - "生态修复"
+    # 药监局/医保局/数据局/人社/证监会/知识产权
+    - "医疗器械"
+    - "DRG"
+    - "DIP"
+    - "长护险"
+    - "中医药"
+    - "数字政府"
+    - "数据开放"
+    - "认证认可"
+    - "反垄断"
+    - "就业"
+    - "社保"
+    - "注册制"
+    - "商标"
+    - "专利"
+    - "EDV"
 
   # 观察级：命中仅记录，不加分
   watch:
