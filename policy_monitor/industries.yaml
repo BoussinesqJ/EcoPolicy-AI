@@ -37,7 +37,6 @@ strategic_emerging:
       departments:
         - "工信部"
         - "科技部"
-        - "国家数据局"
 
     生物技术:
       name: "生物技术"
@@ -56,8 +55,6 @@ strategic_emerging:
       departments:
         - "科技部"
         - "农业农村部"
-        - "国家药监局"
-        - "国家医保局"
 
     新能源:
       name: "新能源"
@@ -355,7 +352,7 @@ three_industries:
   第三产业:
     keywords_high: ["服务业", "金融", "旅游", "教育", "医疗", "物流"]
     keywords_medium: ["消费", "零售", "文化", "体育", "养老"]
-    departments: ["发改委", "商务部", "文旅部", "国家医保局", "人社部", "证监会"]
+    departments: ["发改委", "商务部", "文旅部"]
 
 # ============================================================
 # 部门 - 数据源映射（供 config.yaml 扩展参考）
@@ -439,32 +436,69 @@ department_sources:
     url: "https://www.forestry.gov.cn/c/zfxxgkfp/fgwj/gz/index.html"
     status: "untested"
 
+  # v3.0 新增部门（通过国务院API关键词覆盖）
   国家医保局:
     type: "api"
-    url: "通过国务院API覆盖"
+    url: "国务院API-医疗保障"
     status: "verified"
-    note: "通过国务院-医疗保障API源覆盖"
+    note: "覆盖：医保目录/DRG-DIP/集中采购/创新药准入"
 
   国家数据局:
     type: "api"
-    url: "通过国务院API覆盖"
+    url: "国务院API-数据治理"
     status: "verified"
-    note: "通过国务院-数据治理API源覆盖"
+    note: "覆盖：数据要素/数据安全/数据交易/公共数据开放"
+
+  中国人民银行:
+    type: "api"
+    url: "国务院API-金融政策"
+    status: "verified"
+    note: "覆盖：科技金融/绿色金融/数字金融/碳减排支持"
+
+  中国证监会:
+    type: "api"
+    url: "国务院API-资本市场"
+    status: "verified"
+    note: "覆盖：IPO/北交所/科创板/并购重组/注册制"
+
+  国家知识产权局:
+    type: "api"
+    url: "国务院API-知识产权"
+    status: "verified"
+    note: "覆盖：专利/商标/知识产权保护/EDV/专利导航"
+
+  国务院国资委:
+    type: "api"
+    url: "国务院API-国企改革"
+    status: "verified"
+    note: "覆盖：混合所有制/央企重组/国有资本运营"
 
   人社部:
     type: "api"
-    url: "通过国务院API覆盖"
+    url: "国务院API-人力资源"
     status: "verified"
-    note: "通过国务院-人力资源API源覆盖"
+    note: "覆盖：人才引进/就业补贴/技能培训/博士后/职称评审"
 
-  证监会:
+  市场监管总局:
     type: "api"
-    url: "通过国务院API覆盖"
+    url: "国务院API-标准质量"
     status: "verified"
-    note: "通过国务院-资本市场API源覆盖"
+    note: "覆盖：国家标准/认证认可/质量强国/标准化战略"
 
-  知识产权局:
+  教育部:
     type: "api"
-    url: "通过国务院API覆盖"
+    url: "国务院API-教育人才"
     status: "verified"
-    note: "通过国务院-知识产权API源覆盖"
+    note: "覆盖：产教融合/职业教育/校企合作/人才培养"
+
+  文旅部:
+    type: "api"
+    url: "国务院API-文化旅游"
+    status: "verified"
+    note: "覆盖：文化产业/数字文旅/乡村旅游/文旅融合"
+
+  民政部:
+    type: "api"
+    url: "国务院API-民政服务"
+    status: "verified"
+    note: "覆盖：养老服务/社区治理/数字政务/智慧民政"

@@ -1,7 +1,7 @@
 # ============================================================
-# 政策监控配置 v2.0
+# 政策监控配置 v3.0
 # 策略：国务院API多关键词覆盖 + 已验证HTML源 + 省级源
-# 更新：2026-05-23 - 五大产业分类全覆盖
+# 更新：2026-05-24 - v3.0 新增药监局/医保局/数据局/央行/证监会/知识产权局等12源
 # ============================================================
 
 sources:
@@ -170,69 +170,105 @@ sources:
     enabled: true
     note: "覆盖：碳达峰/碳中和/污染防治/生态修复/环保督察/碳交易"
 
-  # A21. 药品监管（药监局）
+  # ============================================================
+  # A21-A32. v3.0 新增行业专项源
+  # ============================================================
+
+  # A21. 药品监管（国家药品监督管理局）
   - name: "国务院-药品监管"
-    url: "https://sousuo.www.gov.cn/search-gov/data?t=zhengcelibrary_gwyzcwjk&q=%E8%8D%AF%E5%93%81+%E7%9B%91%E7%AE%A1&timetype=timeqb&sort=pubtime&sortType=1&searchfield=title&p=0&n=20"
+    url: "https://sousuo.www.gov.cn/search-gov/data?t=zhengcelibrary_gwyzcwjk&q=%E8%8D%AF%E5%93%81+%E5%8C%BB%E7%96%97%E5%99%A8%E6%A2%B0&timetype=timeqb&sort=pubtime&sortType=1&searchfield=title&p=0&n=20"
     type: "api"
     frequency: "weekly"
     enabled: true
-    note: "覆盖药监局政策：药品审批/医疗器械/临床试验/MAH/药品安全"
+    note: "覆盖：药品审批/医疗器械/GMP/临床试验/MAH/仿制药一致性评价"
 
-  # A22. 医疗保障（医保局）
+  # A22. 医疗保障（国家医疗保障局）
   - name: "国务院-医疗保障"
-    url: "https://sousuo.www.gov.cn/search-gov/data?t=zhengcelibrary_gwyzcwjk&q=%E5%8C%BB%E7%96%97%E4%BF%9D%E9%9A%9C&timetype=timeqb&sort=pubtime&sortType=1&searchfield=title&p=0&n=20"
+    url: "https://sousuo.www.gov.cn/search-gov/data?t=zhengcelibrary_gwyzcwjk&q=%E5%8C%BB%E7%96%97%E4%BF%9D%E9%99%A9&timetype=timeqb&sort=pubtime&sortType=1&searchfield=title&p=0&n=20"
     type: "api"
     frequency: "weekly"
     enabled: true
-    note: "覆盖医保局政策：医保目录/集采/DRG/DIP/长护险/医保支付"
+    note: "覆盖：医保目录/DRG/DIP支付改革/集中采购/创新药准入"
 
-  # A23. 数据治理（数据局）
+  # A23. 数据治理（国家数据局）
   - name: "国务院-数据治理"
-    url: "https://sousuo.www.gov.cn/search-gov/data?t=zhengcelibrary_gwyzcwjk&q=%E6%95%B0%E6%8D%AE%E8%A6%81%E7%B4%A0+%E5%85%AC%E5%85%B1%E6%95%B0%E6%8D%AE&timetype=timeqb&sort=pubtime&sortType=1&searchfield=title&p=0&n=20"
+    url: "https://sousuo.www.gov.cn/search-gov/data?t=zhengcelibrary_gwyzcwjk&q=%E6%95%B0%E6%8D%AE%E8%A6%81%E7%B4%A0+%E6%95%B0%E6%8D%AE%E5%AE%89%E5%85%A8&timetype=timeqb&sort=pubtime&sortType=1&searchfield=title&p=0&n=20"
     type: "api"
     frequency: "weekly"
     enabled: true
-    note: "覆盖数据局政策：数据要素/公共数据开放/数据安全/数字政府/数据资产"
+    note: "覆盖：数据要素流通/数据安全/数据交易/公共数据开放/数据资产"
 
-  # A24. 卫生健康（卫健委）
-  - name: "国务院-卫生健康"
-    url: "https://sousuo.www.gov.cn/search-gov/data?t=zhengcelibrary_gwyzcwjk&q=%E5%8D%AB%E7%94%9F%E5%81%A5%E5%BA%B7&timetype=timeqb&sort=pubtime&sortType=1&searchfield=title&p=0&n=20"
+  # A24. 金融政策（中国人民银行）
+  - name: "国务院-金融政策"
+    url: "https://sousuo.www.gov.cn/search-gov/data?t=zhengcelibrary_gwyzcwjk&q=%E7%A7%91%E6%8A%80%E9%87%91%E8%9E%8D+%E7%BB%BF%E8%89%B2%E9%87%91%E8%9E%8D&timetype=timeqb&sort=pubtime&sortType=1&searchfield=title&p=0&n=20"
     type: "api"
     frequency: "weekly"
     enabled: true
-    note: "覆盖卫健委政策：医疗服务/公共卫生/中医药/分级诊疗"
+    note: "覆盖：科技金融/绿色金融/普惠金融/数字金融/碳减排支持工具"
 
-  # A25. 市场监管（市场监管总局）
-  - name: "国务院-市场监管"
-    url: "https://sousuo.www.gov.cn/search-gov/data?t=zhengcelibrary_gwyzcwjk&q=%E5%B8%82%E5%9C%BA%E7%9B%91%E7%AE%A1&timetype=timeqb&sort=pubtime&sortType=1&searchfield=title&p=0&n=20"
-    type: "api"
-    frequency: "weekly"
-    enabled: true
-    note: "覆盖市场监管总局政策：质量标准/认证认可/食品安全/反垄断"
-
-  # A26. 人力资源与人才（人社部）
-  - name: "国务院-人力资源"
-    url: "https://sousuo.www.gov.cn/search-gov/data?t=zhengcelibrary_gwyzcwjk&q=%E4%BA%BA%E6%89%8D+%E5%B0%B1%E4%B8%9A&timetype=timeqb&sort=pubtime&sortType=1&searchfield=title&p=0&n=20"
-    type: "api"
-    frequency: "weekly"
-    enabled: true
-    note: "覆盖人社部政策：人才政策/就业/社保/技能人才"
-
-  # A27. 资本市场（证监会）
+  # A25. 资本市场（中国证监会）
   - name: "国务院-资本市场"
-    url: "https://sousuo.www.gov.cn/search-gov/data?t=zhengcelibrary_gwyzcwjk&q=%E8%82%A1%E7%A5%A8+IPO+%E4%B8%8A%E5%B8%82&timetype=timeqb&sort=pubtime&sortType=1&searchfield=title&p=0&n=20"
+    url: "https://sousuo.www.gov.cn/search-gov/data?t=zhengcelibrary_gwyzcwjk&q=%E4%B8%8A%E5%B8%82+%E8%9E%8D%E8%B5%84+IPO&timetype=timeqb&sort=pubtime&sortType=1&searchfield=title&p=0&n=20"
     type: "api"
     frequency: "weekly"
     enabled: true
-    note: "覆盖证监会政策：IPO/注册制/再融资/并购重组"
+    note: "覆盖：IPO/再融资/北交所/科创板/并购重组/注册制/退市"
 
-  # A28. 知识产权（知识产权局）
+  # A26. 知识产权（国家知识产权局）
   - name: "国务院-知识产权"
-    url: "https://sousuo.www.gov.cn/search-gov/data?t=zhengcelibrary_gwyzcwjk&q=%E7%9F%A5%E8%AF%86%E4%BA%A7%E6%9D%83&timetype=timeqb&sort=pubtime&sortType=1&searchfield=title&p=0&n=20"
+    url: "https://sousuo.www.gov.cn/search-gov/data?t=zhengcelibrary_gwyzcwjk&q=%E7%9F%A5%E8%AF%86%E4%BA%A7%E6%9D%83+%E4%B8%93%E5%88%A9&timetype=timeqb&sort=pubtime&sortType=1&searchfield=title&p=0&n=20"
     type: "api"
     frequency: "weekly"
     enabled: true
-    note: "覆盖知识产权局政策：专利/商标/知识产权保护/EDV/种业知识产权"
+    note: "覆盖：专利/商标/知识产权保护/种业知识产权/EDV/专利导航"
+
+  # A27. 国企改革（国务院国资委）
+  - name: "国务院-国企改革"
+    url: "https://sousuo.www.gov.cn/search-gov/data?t=zhengcelibrary_gwyzcwjk&q=%E5%9B%BD%E4%BC%81%E6%94%B9%E9%9D%A9+%E5%A4%AE%E4%BC%81&timetype=timeqb&sort=pubtime&sortType=1&searchfield=title&p=0&n=20"
+    type: "api"
+    frequency: "weekly"
+    enabled: true
+    note: "覆盖：混合所有制/央企重组/国有资本投资运营/三项制度改革"
+
+  # A28. 人力资源（人社部）
+  - name: "国务院-人力资源"
+    url: "https://sousuo.www.gov.cn/search-gov/data?t=zhengcelibrary_gwyzcwjk&q=%E4%BA%BA%E6%89%8D+%E5%B0%B1%E4%B8%9A+%E6%8A%80%E8%83%BD&timetype=timeqb&sort=pubtime&sortType=1&searchfield=title&p=0&n=20"
+    type: "api"
+    frequency: "weekly"
+    enabled: true
+    note: "覆盖：人才引进/就业补贴/技能培训/博士后/社保/职称评审"
+
+  # A29. 标准与质量（市场监管总局）
+  - name: "国务院-标准质量"
+    url: "https://sousuo.www.gov.cn/search-gov/data?t=zhengcelibrary_gwyzcwjk&q=%E6%A0%87%E5%87%86+%E8%B4%A8%E9%87%8F+%E8%AE%A4%E8%AF%81&timetype=timeqb&sort=pubtime&sortType=1&searchfield=title&p=0&n=20"
+    type: "api"
+    frequency: "weekly"
+    enabled: true
+    note: "覆盖：国家标准/行业标准/认证认可/质量强国/标准化战略"
+
+  # A30. 教育与人才（教育部）
+  - name: "国务院-教育人才"
+    url: "https://sousuo.www.gov.cn/search-gov/data?t=zhengcelibrary_gwyzcwjk&q=%E4%BA%A7%E6%95%99%E8%9E%8D%E5%90%88+%E8%81%8C%E4%B8%9A%E6%95%99%E8%82%B2&timetype=timeqb&sort=pubtime&sortType=1&searchfield=title&p=0&n=20"
+    type: "api"
+    frequency: "weekly"
+    enabled: true
+    note: "覆盖：产教融合/职业教育/校企合作/产业学院/人才培养"
+
+  # A31. 文化旅游（文旅部）
+  - name: "国务院-文化旅游"
+    url: "https://sousuo.www.gov.cn/search-gov/data?t=zhengcelibrary_gwyzcwjk&q=%E6%96%87%E5%8C%96%E4%BA%A7%E4%B8%9A+%E6%97%85%E6%B8%B8&timetype=timeqb&sort=pubtime&sortType=1&searchfield=title&p=0&n=20"
+    type: "api"
+    frequency: "weekly"
+    enabled: true
+    note: "覆盖：文化产业/数字文旅/乡村旅游/非遗/文旅融合"
+
+  # A32. 民政与社会服务（民政部）
+  - name: "国务院-民政服务"
+    url: "https://sousuo.www.gov.cn/search-gov/data?t=zhengcelibrary_gwyzcwjk&q=%E5%85%BB%E8%80%81+%E7%A4%BE%E5%8C%BA+%E6%95%B0%E5%AD%97%E6%94%BF%E5%8A%A1&timetype=timeqb&sort=pubtime&sortType=1&searchfield=title&p=0&n=20"
+    type: "api"
+    frequency: "weekly"
+    enabled: true
+    note: "覆盖：养老服务/社区治理/数字政务/社会组织/智慧民政"
 
   # ============================================================
   # B. 已验证的 HTML 源（直接抓取，数据质量好）
@@ -326,14 +362,6 @@ global_keywords:
     - "6G"
     - "脑机接口"
     - "生物制造"
-    # 药监局/医保局/数据局/知识产权
-    - "医保目录"
-    - "药品集采"
-    - "创新药审批"
-    - "公共数据"
-    - "数据安全"
-    - "数据资产"
-    - "知识产权"
 
   # 中优先级：命中一个 +1 分（标题命中 +2 分）
   medium_priority:
@@ -400,22 +428,6 @@ global_keywords:
     - "碳中和"
     - "污染防治"
     - "生态修复"
-    # 药监局/医保局/数据局/人社/证监会/知识产权
-    - "医疗器械"
-    - "DRG"
-    - "DIP"
-    - "长护险"
-    - "中医药"
-    - "数字政府"
-    - "数据开放"
-    - "认证认可"
-    - "反垄断"
-    - "就业"
-    - "社保"
-    - "注册制"
-    - "商标"
-    - "专利"
-    - "EDV"
 
   # 观察级：命中仅记录，不加分
   watch:
@@ -427,6 +439,14 @@ global_keywords:
     - "安全"
     - "环保"
     - "碳排放"
+    # v3.0 新增观察词
+    - "医疗器械"
+    - "医保目录"
+    - "数据安全"
+    - "知识产权"
+    - "混合所有制"
+    - "职业技能"
+    - "数字政务"
 
 # ============================================================
 # 地区配置
