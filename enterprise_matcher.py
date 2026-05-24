@@ -290,6 +290,33 @@ INDUSTRY_DIMENSIONS = {
                        "科技成果转化"],
         },
     },
+    # v3.0 新增：煤炭/能源/矿山/工程设计
+    "煤炭能源": {
+        "tech": {
+            "high": ["煤矿智能化", "智慧矿山", "无人开采", "安全监控",
+                     "矿山数字孪生", "自动化采掘", "瓦斯治理"],
+            "medium": ["煤矿设计", "矿井通风", "井下定位", "远程监控",
+                       "矿山信息化", "工业互联网"],
+        },
+        "prod": {
+            "high": ["生态修复", "绿色矿山", "矿区治理", "塌陷区修复",
+                     "矿井水处理", "煤矸石利用"],
+            "medium": ["工程设计", "工程咨询", "工程总承包", "施工图审查",
+                       "项目管理", "环境影响评价"],
+        },
+        "mkt": {
+            "high": ["煤矿安全生产", "煤炭清洁利用", "碳减排",
+                     "矿山修复", "资源综合利用", "生态治理"],
+            "medium": ["煤炭交易", "煤化工", "煤电联营", "矿产资源",
+                       "采矿权", "探矿权"],
+        },
+        "cap": {
+            "high": ["能源基金", "绿色发展基金", "生态修复资金",
+                     "安全生产补贴", "煤炭转型升级"],
+            "medium": ["技改贴息", "设备更新贷款", "产业引导基金",
+                       "科技创新补贴"],
+        },
+    },
     # v3.0 新增：轻资产/平台型（适用于数字经济、咨询服务、SaaS等）
     "轻资产": {
         "tech": {
@@ -466,9 +493,12 @@ class EnterpriseMatcher:
         capital = profile.get("capital", {})
         biz_model = profile.get("business_model", {})
 
-        # v3.0: 判断是否为轻资产企业
-        is_asset_light = biz_model.get("model_type", "") in (
-            "平台型", "SaaS", "服务型", "咨询", "轻资产"
+        # v3.0: 判断是否为轻资产企业（排除有实体基地/重资产的服务型企业）
+        has_base = biz_model.get("has_production_base", True)
+        model_type = biz_model.get("model_type", "")
+        is_asset_light = (
+            model_type in ("平台型", "SaaS", "咨询", "轻资产")
+            or (model_type == "服务型" and not has_base)
         )
 
         # 条件1: 注册地检查
@@ -584,8 +614,13 @@ class EnterpriseMatcher:
         # v3.0 改进：支持模糊匹配 + 商业模式自动识别
         industry_dims = {}
 
-        # 先检查是否为轻资产企业
-        if business_model in ("平台型", "SaaS", "服务型", "咨询", "轻资产"):
+        # 先检查是否为轻资产企业（排除有实体基地/重资产的服务型企业）
+        has_base = profile.get("business_model", {}).get("has_production_base", True)
+        is_truly_asset_light = (
+            business_model in ("平台型", "SaaS", "咨询", "轻资产")
+            or (business_model == "服务型" and not has_base)
+        )
+        if is_truly_asset_light:
             industry_dims = INDUSTRY_DIMENSIONS.get("轻资产", {})
         else:
             # 行业关键词模糊匹配（支持多个关键词命中）
@@ -599,13 +634,15 @@ class EnterpriseMatcher:
                 elif sector_key == "数字经济":
                     sector_keywords.extend(["数字", "软件", "信息", "AI", "数据", "智能"])
                 elif sector_key == "新能源":
-                    sector_keywords.extend(["能源", "光伏", "储能", "氢能", "风电", "碳"])
+                    sector_keywords.extend(["光伏", "储能", "氢能", "风电", "碳", "清洁能源", "可再生能源"])
                 elif sector_key == "生物医药":
                     sector_keywords.extend(["医药", "制药", "生物", "医疗", "药"])
                 elif sector_key == "新材料":
                     sector_keywords.extend(["材料", "纤维", "合金", "复合材料"])
                 elif sector_key == "种业":
                     sector_keywords.extend(["种", "农业", "育种", "种子"])
+                elif sector_key == "煤炭能源":
+                    sector_keywords.extend(["煤", "矿", "能源", "工程设计", "工程咨询", "生态修复"])
 
                 if any(kw in industry_sector for kw in sector_keywords):
                     industry_dims = dims

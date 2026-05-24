@@ -223,17 +223,13 @@ enterprise: "{m.enterprise_id}"
 
 ## 任务说明
 
-AI 助手，请读取以下文件，然后执行 `系统配置/analysis_workflow.md` 中定义的六步标准分析工作流：
+AI 助手，请读取以下文件，然后执行 CLAUDE.md 中定义的六步标准分析工作流：
 
 **必读文件**:
-1. `CLAUDE.md` - 了解系统配置
+1. `CLAUDE.md` - 系统配置 + 六步工作流 + 输出规范
 2. `enterprises/{m.enterprise_id}/profile.yaml` - 企业画像
-3. `系统配置/analysis_workflow.md` - 六步工作流
-4. `系统配置/policy_matrix_generator.md` - 行业分析框架
-5. `系统配置/output_standards.md` - 输出规范
-
-**可选文件**（如需深度报告）:
-6. `系统配置/agent_system_prompt.md` - Agent 系统提示词
+3. `config/policy_matrix_generator.md` - 行业分析框架
+4. `config/output_standards.md` - 输出格式规范
 
 ---
 
@@ -283,7 +279,7 @@ AI 助手，请读取以下文件，然后执行 `系统配置/analysis_workflow
 ## 注意事项
 
 - 所有输出文件保存到 `enterprises/{m.enterprise_id}/workspace/` 目录
-- 格式遵循 `系统配置/output_standards.md` 规范
+- 格式遵循 `config/output_standards.md` 规范
 - 评分遵循 PolicyMatch Matrix 四维框架
 - 标注"建议咨询专业顾问"的事项不要给出法律/财务断言
 """

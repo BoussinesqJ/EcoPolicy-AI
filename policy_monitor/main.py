@@ -27,7 +27,7 @@ from database import PolicyDatabase
 from matcher import KeywordMatcher, IndustryMatcher, combined_match
 from notifier import Notifier
 from region_loader import get_sources_for_region, list_all_regions
-from parsers import parse_rss, parse_html, parse_sitemap, parse_api
+from parsers import parse_html, parse_api
 from utils import now_iso, today_str
 
 # ============================================================
@@ -124,16 +124,10 @@ def run_fetch(config: dict, region: str = None, industry: str = None):
         logger.info(f"\n[{i+1}/{len(enabled_sources)}] 正在处理: {source_name} ({source_type})")
 
         try:
-            # 抓取页面
+            # 抓取页面 (api or html)
             if source_type == "api":
                 html = fetcher.fetch(source_url)
                 policies = parse_api(source_url, html, source_name) if html else []
-            elif source_type == "rss":
-                html = fetcher.fetch(source_url)
-                policies = parse_rss(source_url, source_name, html) if html else []
-            elif source_type == "sitemap":
-                content = fetcher.fetch_bytes(source_url)
-                policies = parse_sitemap(source_url, content.decode("utf-8", errors="replace"), source_name) if content else []
             else:
                 html = fetcher.fetch(source_url)
                 policies = parse_html(source_url, html, source_name, selectors) if html else []

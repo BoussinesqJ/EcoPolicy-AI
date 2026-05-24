@@ -258,13 +258,10 @@ tags: ["关键词1", "关键词2", "关键词3"]
 ├── PROJECT_CONTEXT.md                 项目记忆
 ├── company_profile.txt                公司画像
 │
-├── 系统配置/                           系统框架文件
+├── config/                             系统框架文件
 │   ├── company_profile_template.yaml  企业画像模板
 │   ├── policy_matrix_generator.md     分析框架
-│   ├── analysis_workflow.md           工作流
-│   ├── output_standards.md            输出规范
-│   ├── agent_system_prompt.md         Agent 提示词
-│   └── policy_sources_catalog.md      政策监控源
+│   └── output_standards.md            输出规范
 │
 └── {政策项目名}/                       每个政策项目一个子文件夹
     ├── policy_analysis_*.md           政策分析报告

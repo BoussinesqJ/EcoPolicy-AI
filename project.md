@@ -1,8 +1,8 @@
-# 项目计划：经济政策智能分析系统 (EcoPolicy AI)
+# 项目计划：经济政策分析专家系统 (EcoPolicy AI)
 
 ## 一、项目目标
 
-构建一个**通用化的经济政策智能分析平台**，为任意企业/行业/区域提供：
+构建**通用化的经济政策分析专家系统**，为任意企业/行业/区域提供：
 
 - 政策文本的自动抓取与结构化解析
 - 企业画像与政策的多维智能匹配
@@ -17,8 +17,10 @@
 | 子系统 | 功能 | 入口 |
 |:--|:--|:--|
 | **政策监控** | 多源政策抓取、解析、关键词匹配、通知 | `policy_monitor/main.py` |
-| **Agent 编排** | 企业匹配、简报生成、工作流调度 | `agent/agent.py` |
+| **企业匹配** | 8 个行业维度 × 四维分析（Tech/Prod/Mkt/Cap） | `enterprise_matcher.py` |
 | **配置框架** | 企业画像模板、行业矩阵、输出规范 | `config/` |
+
+> 架构说明：本系统是**对话式专家系统**，AI 对话引擎（Claude/GPT）负责分析和报告生成，Python 工具层负责数据抓取和存储。
 
 ---
 
@@ -28,49 +30,59 @@
 - **存储**：SQLite（本地数据库）
 - **网络**：requests + BeautifulSoup4（安全爬取）
 - **配置**：YAML（可读性强，易于扩展）
-- **AI 集成**：CLAUDE.md 指令文件 + agent_system_prompt.md
+- **AI 集成**：CLAUDE.md 指令文件（角色定义 + 分析框架 + 输出规范）
 
 ### 数据流
 
 ```
-政策源（API/RSS/HTML）
-  → fetcher.py（安全请求）
-    → parsers/（结构化解析）
+政策源（API / HTML）
+  → fetcher.py（安全请求，robots.txt 遵守）
+    → parsers/（API / HTML 结构化解析）
       → database.py（SQLite 存储）
-        → matcher.py（关键词匹配）
-          → enterprise_matcher.py（企业匹配）
-            → report_generator.py（简报生成）
-              → notifier.py（通知推送）
+        → matcher.py（关键词匹配 + P0/P1/P2 评分）
+          → enterprise_matcher.py（企业多维匹配）
+            → AI 对话引擎（深度分析 + 报告生成）
 ```
 
 ---
 
 ## 四、里程碑
 
-### Phase 1：基础系统（已完成）
+### Phase 1：基础系统 [已完成]
 
 - [x] 政策监控工具核心（fetcher + parsers + database）
 - [x] 关键词匹配器 + P0/P1/P2 评分
-- [x] 25 个国家/省/市级数据源接入
+- [x] 37 个国家源 + 31 省级配置
 - [x] 产业分类体系（5 大类 43 子行业）
-- [x] 省市级区域配置加载器
-- [x] Agent 编排系统（scanner + matcher + reporter + notifier）
-- [x] 企业画像模板（10 大维度）
+- [x] 企业画像模板（10 大维度 + 轻资产适配）
+- [x] 7 个行业专属分析框架（每个 40+ 关键词）
 - [x] 六步标准工作流
 - [x] 输出规范（5/5 分制、P0/P1/P2、商务简报风格）
+- [x] CLI 英文化
 
-### Phase 2：验证与优化（当前）
+### Phase 2：验证与优化 [已完成]
 
-- [x] 多行业案例验证（种业 + 制造业 + 数字经济 + 新能源 + 生物医药）
-- [ ] 反馈闭环机制（追踪申报结果 vs 建议）
-- [ ] 定时调度集成（Windows Task Scheduler / cron）
+- [x] 多行业案例验证（5 行业：制造/数字/能源/医药/材料）
+- [x] +12 个政策数据源（药监局/医保局/数据局等）
+- [x] 行业深度深挖 + 轻资产适配
+- [x] 反馈机制 + 定时调度 + 安全审查脚本
+- [x] 多企业档案隔离验证（跨行业企业对比验证）
+- [x] 匹配器 bug 修复（5 项：煤炭能源误判/种业单字符/地址截断/轻资产误判/关键词去重）
 
-### Phase 3：社区化
+### Phase 2.5：架构精简 [已完成]
 
-- [ ] 更多行业分析模板
-- [ ] 更多省市数据源
-- [ ] Web UI（可选）
-- [ ] 接入更多 AI 模型
+- [x] 删除 agent/ 整个模块（10 个文件），AI 对话引擎天然处理
+- [x] 核心逻辑提升到根目录（enterprise_matcher.py + report_generator.py）
+- [x] config/ 从 6 个文件精简为 3 个核心文件
+- [x] 移除未使用的解析器（rss_parser + sitemap_parser）
+- [x] 增强 CLAUDE.md（吸收 agent config + 使用指南 + 安全规则）
+
+### Phase 3：Agent 增强 [进行中]
+
+- [x] 多轮对话支持（context.py + chat.py）
+- [ ] 申报草稿自动生成（可研报告大纲等）
+- [ ] 批量匹配（一个企业同时匹配多条政策，按优先级排序）
+- [ ] 政策历史版本对比与变化追踪
 
 ---
 
