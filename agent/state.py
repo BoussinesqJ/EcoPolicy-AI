@@ -121,14 +121,14 @@ class AgentState:
         """打印系统状态"""
         status = self.get_status()
         print(f"\n{'=' * 50}")
-        print(f"  EcoPolicy Agent - 系统状态")
+        print(f"  EcoPolicy Agent - System Status")
         print(f"{'=' * 50}")
-        print(f"  最后扫描: {status['last_scan'] or '从未扫描'}")
-        print(f"  累计扫描: {status['total_scans']} 次")
-        print(f"  待处理简报: {status['pending_briefs']} 份")
-        print(f"  已完成分析: {status['completed_analyses']} 份")
+        print(f"  Last scan: {status['last_scan'] or 'Never'}")
+        print(f"  Total scans: {status['total_scans']}")
+        print(f"  Pending briefs: {status['pending_briefs']}")
+        print(f"  Completed analyses: {status['completed_analyses']}")
         if status["enterprise_stats"]:
-            print(f"\n  企业统计:")
+            print(f"\n  Enterprise stats:")
             for eid, stats in status["enterprise_stats"].items():
-                print(f"    {eid}: 简报 {stats['total_briefs']} / 已分析 {stats['completed_analyses']}")
+                print(f"    {eid}: briefs {stats['total_briefs']} / analyzed {stats['completed_analyses']}")
         print(f"{'=' * 50}\n")

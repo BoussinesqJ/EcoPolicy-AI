@@ -1,0 +1,25 @@
+# -*- coding: utf-8 -*-
+# 新疆维吾尔自治区 - Policy Monitor Region Config
+# Auto-generated on 2026-05-24
+
+name: 新疆维吾尔自治区
+aliases: ['新疆', '新', 'xinjiang']
+parent_province: null
+
+sources:
+  # State Council API search (reliable, always works)
+  - name: "StateCouncil-新疆"
+    url: "https://sousuo.www.gov.cn/search-gov/data?t=zhengcelibrary_gwyzcwjk&q=新疆维吾尔自治区&timetype=timeqb&sort=pubtime&sortType=1&searchfield=title&p=0&n=20"
+    type: "api"
+    frequency: "weekly"
+    enabled: true
+    note: "State Council policy library, filtered by 新疆维吾尔自治区"
+  # Provincial government portal (HTML)
+  - name: "新疆Government"
+    url: "http://www.xinjiang.gov.cn/zwgk/zfxxgk/"
+    type: "html"
+    frequency: "weekly"
+    selectors:
+      list: ".list_content li a, .news-list li a"
+    enabled: true
+    note: "新疆维吾尔自治区 government portal"

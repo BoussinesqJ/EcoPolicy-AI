@@ -1,0 +1,25 @@
+# -*- coding: utf-8 -*-
+# 江苏省 - Policy Monitor Region Config
+# Auto-generated on 2026-05-24
+
+name: 江苏省
+aliases: ['江苏', '苏', 'jiangsu']
+parent_province: null
+
+sources:
+  # State Council API search (reliable, always works)
+  - name: "StateCouncil-江苏"
+    url: "https://sousuo.www.gov.cn/search-gov/data?t=zhengcelibrary_gwyzcwjk&q=江苏省&timetype=timeqb&sort=pubtime&sortType=1&searchfield=title&p=0&n=20"
+    type: "api"
+    frequency: "weekly"
+    enabled: true
+    note: "State Council policy library, filtered by 江苏省"
+  # Provincial government portal (HTML)
+  - name: "江苏Government"
+    url: "https://www.jiangsu.gov.cn/col/col59486/index.html"
+    type: "html"
+    frequency: "weekly"
+    selectors:
+      list: ".list_content li a, .news-list li a"
+    enabled: true
+    note: "江苏省 government portal"

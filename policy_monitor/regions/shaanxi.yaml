@@ -1,0 +1,25 @@
+# -*- coding: utf-8 -*-
+# 陕西省 - Policy Monitor Region Config
+# Auto-generated on 2026-05-24
+
+name: 陕西省
+aliases: ['陕西', '陕', '秦', 'shaanxi']
+parent_province: null
+
+sources:
+  # State Council API search (reliable, always works)
+  - name: "StateCouncil-陕西"
+    url: "https://sousuo.www.gov.cn/search-gov/data?t=zhengcelibrary_gwyzcwjk&q=陕西省&timetype=timeqb&sort=pubtime&sortType=1&searchfield=title&p=0&n=20"
+    type: "api"
+    frequency: "weekly"
+    enabled: true
+    note: "State Council policy library, filtered by 陕西省"
+  # Provincial government portal (HTML)
+  - name: "陕西Government"
+    url: "http://www.shaanxi.gov.cn/zfxxgk/zfxxgkzl/qzfbgt/index.html"
+    type: "html"
+    frequency: "weekly"
+    selectors:
+      list: ".list_content li a, .news-list li a"
+    enabled: true
+    note: "陕西省 government portal"

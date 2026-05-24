@@ -1,0 +1,25 @@
+# -*- coding: utf-8 -*-
+# 重庆市 - Policy Monitor Region Config
+# Auto-generated on 2026-05-24
+
+name: 重庆市
+aliases: ['重庆', '渝', 'chongqing']
+parent_province: null
+
+sources:
+  # State Council API search (reliable, always works)
+  - name: "StateCouncil-重庆"
+    url: "https://sousuo.www.gov.cn/search-gov/data?t=zhengcelibrary_gwyzcwjk&q=重庆市&timetype=timeqb&sort=pubtime&sortType=1&searchfield=title&p=0&n=20"
+    type: "api"
+    frequency: "weekly"
+    enabled: true
+    note: "State Council policy library, filtered by 重庆市"
+  # Provincial government portal (HTML)
+  - name: "重庆Government"
+    url: "http://www.cq.gov.cn/zwgk/zfxxgkzl/fdzdgknr/"
+    type: "html"
+    frequency: "weekly"
+    selectors:
+      list: ".list_content li a, .news-list li a"
+    enabled: true
+    note: "重庆市 government portal"

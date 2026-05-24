@@ -1,0 +1,25 @@
+# -*- coding: utf-8 -*-
+# 安徽省 - Policy Monitor Region Config
+# Auto-generated on 2026-05-24
+
+name: 安徽省
+aliases: ['安徽', '皖', 'anhui']
+parent_province: null
+
+sources:
+  # State Council API search (reliable, always works)
+  - name: "StateCouncil-安徽"
+    url: "https://sousuo.www.gov.cn/search-gov/data?t=zhengcelibrary_gwyzcwjk&q=安徽省&timetype=timeqb&sort=pubtime&sortType=1&searchfield=title&p=0&n=20"
+    type: "api"
+    frequency: "weekly"
+    enabled: true
+    note: "State Council policy library, filtered by 安徽省"
+  # Provincial government portal (HTML)
+  - name: "安徽Government"
+    url: "http://www.ah.gov.cn/content/column/6849f3a0-0e29-4e4b-a99d-3b8f10a1590d.html"
+    type: "html"
+    frequency: "weekly"
+    selectors:
+      list: ".list_content li a, .news-list li a"
+    enabled: true
+    note: "安徽省 government portal"

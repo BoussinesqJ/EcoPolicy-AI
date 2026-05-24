@@ -74,6 +74,28 @@ CREATE TABLE IF NOT EXISTS agent_runs (
     briefs_generated INTEGER DEFAULT 0,
     error_message TEXT
 );
+
+-- Agent: 反馈记录表
+CREATE TABLE IF NOT EXISTS feedback (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    policy_url_hash TEXT NOT NULL,
+    enterprise_id TEXT NOT NULL,
+    brief_path TEXT,                    -- 对应的简报文件路径
+    action TEXT NOT NULL,               -- accepted / rejected / pending
+    action_detail TEXT,                 -- 用户备注（如"已申报"/"不适用"）
+    outcome TEXT DEFAULT 'pending',     -- pending / submitted / approved / rejected / not_applicable
+    outcome_detail TEXT,                -- 结果详情
+    accuracy_score INTEGER,             -- AI 推荐准确性 1-5 分
+    usefulness_score INTEGER,           -- 分析有用性 1-5 分
+    feedback_notes TEXT,                -- 用户反馈备注
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL,
+    UNIQUE(policy_url_hash, enterprise_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_feedback_enterprise ON feedback(enterprise_id);
+CREATE INDEX IF NOT EXISTS idx_feedback_action ON feedback(action);
+CREATE INDEX IF NOT EXISTS idx_feedback_outcome ON feedback(outcome);
 """
 
 
@@ -330,6 +352,122 @@ class PolicyDatabase:
             (limit,),
         ).fetchall()
         return [dict(r) for r in rows]
+
+    # ============================================================
+    # Agent: 反馈管理
+    # ============================================================
+
+    def submit_feedback(self, policy_url_hash: str, enterprise_id: str,
+                        action: str, action_detail: str = "",
+                        brief_path: str = "") -> bool:
+        """提交反馈（采纳/拒绝/待定）
+
+        Args:
+            action: accepted / rejected / pending
+            action_detail: 用户备注
+        """
+        try:
+            now = now_iso()
+            self.conn.execute(
+                """INSERT INTO feedback
+                   (policy_url_hash, enterprise_id, brief_path, action,
+                    action_detail, outcome, created_at, updated_at)
+                   VALUES (?, ?, ?, ?, ?, 'pending', ?, ?)""",
+                (policy_url_hash, enterprise_id, brief_path,
+                 action, action_detail, now, now),
+            )
+            self.conn.commit()
+            return True
+        except sqlite3.IntegrityError:
+            # 已有记录，更新
+            self.conn.execute(
+                """UPDATE feedback
+                   SET action = ?, action_detail = ?, updated_at = ?
+                   WHERE policy_url_hash = ? AND enterprise_id = ?""",
+                (action, action_detail, now_iso(), policy_url_hash, enterprise_id),
+            )
+            self.conn.commit()
+            return True
+
+    def update_outcome(self, policy_url_hash: str, enterprise_id: str,
+                       outcome: str, outcome_detail: str = ""):
+        """更新反馈结果（submitted/approved/rejected/not_applicable）"""
+        self.conn.execute(
+            """UPDATE feedback
+               SET outcome = ?, outcome_detail = ?, updated_at = ?
+               WHERE policy_url_hash = ? AND enterprise_id = ?""",
+            (outcome, outcome_detail, now_iso(), policy_url_hash, enterprise_id),
+        )
+        self.conn.commit()
+
+    def submit_feedback_scores(self, policy_url_hash: str, enterprise_id: str,
+                               accuracy_score: int, usefulness_score: int,
+                               notes: str = ""):
+        """提交反馈评分"""
+        self.conn.execute(
+            """UPDATE feedback
+               SET accuracy_score = ?, usefulness_score = ?,
+                   feedback_notes = ?, updated_at = ?
+               WHERE policy_url_hash = ? AND enterprise_id = ?""",
+            (accuracy_score, usefulness_score, notes, now_iso(),
+             policy_url_hash, enterprise_id),
+        )
+        self.conn.commit()
+
+    def get_feedback(self, enterprise_id: str = None) -> list[dict]:
+        """获取反馈列表"""
+        if enterprise_id:
+            rows = self.conn.execute(
+                """SELECT f.*, p.title as policy_title, p.source as policy_source
+                   FROM feedback f
+                   JOIN policies p ON f.policy_url_hash = p.url_hash
+                   WHERE f.enterprise_id = ?
+                   ORDER BY f.created_at DESC""",
+                (enterprise_id,),
+            ).fetchall()
+        else:
+            rows = self.conn.execute(
+                """SELECT f.*, p.title as policy_title, p.source as policy_source
+                   FROM feedback f
+                   JOIN policies p ON f.policy_url_hash = p.url_hash
+                   ORDER BY f.created_at DESC""",
+            ).fetchall()
+        return [dict(r) for r in rows]
+
+    def get_feedback_stats(self) -> dict:
+        """获取反馈统计"""
+        total = self.conn.execute("SELECT COUNT(*) FROM feedback").fetchone()[0]
+        accepted = self.conn.execute(
+            "SELECT COUNT(*) FROM feedback WHERE action='accepted'"
+        ).fetchone()[0]
+        rejected = self.conn.execute(
+            "SELECT COUNT(*) FROM feedback WHERE action='rejected'"
+        ).fetchone()[0]
+        submitted = self.conn.execute(
+            "SELECT COUNT(*) FROM feedback WHERE outcome='submitted'"
+        ).fetchone()[0]
+        approved = self.conn.execute(
+            "SELECT COUNT(*) FROM feedback WHERE outcome='approved'"
+        ).fetchone()[0]
+
+        # 平均评分
+        avg_accuracy = self.conn.execute(
+            "SELECT AVG(accuracy_score) FROM feedback WHERE accuracy_score IS NOT NULL"
+        ).fetchone()[0]
+        avg_usefulness = self.conn.execute(
+            "SELECT AVG(usefulness_score) FROM feedback WHERE usefulness_score IS NOT NULL"
+        ).fetchone()[0]
+
+        return {
+            "total": total,
+            "accepted": accepted,
+            "rejected": rejected,
+            "pending": total - accepted - rejected,
+            "submitted": submitted,
+            "approved": approved,
+            "avg_accuracy": round(avg_accuracy, 1) if avg_accuracy else 0,
+            "avg_usefulness": round(avg_usefulness, 1) if avg_usefulness else 0,
+        }
 
     def close(self):
         """关闭连接"""

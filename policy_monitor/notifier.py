@@ -114,7 +114,7 @@ class Notifier:
     def print_summary(self, new_policies: list[dict]):
         """控制台输出摘要"""
         if not new_policies:
-            print("\n[政策监控] 今日无新增政策")
+            print("\n[Policy Monitor] No new policies today")
             return
 
         p0 = [p for p in new_policies if p.get("priority") == "P0"]
@@ -122,23 +122,23 @@ class Notifier:
         p2 = [p for p in new_policies if p.get("priority") == "P2"]
 
         print(f"\n{'='*60}")
-        print(f"  政策监控摘要 - {today_str()}")
+        print(f"  Policy Monitor Summary - {today_str()}")
         print(f"{'='*60}")
-        print(f"  新增: {len(new_policies)} 条  |  P0: {len(p0)}  |  P1: {len(p1)}  |  P2: {len(p2)}")
+        print(f"  New: {len(new_policies)}  |  P0: {len(p0)}  |  P1: {len(p1)}  |  P2: {len(p2)}")
         print(f"{'='*60}")
 
         if p0:
-            print("\n  [P0 紧急]")
+            print("\n  [P0 Critical]")
             for p in p0:
-                print(f"    -> [{p.get('score', 0)}分] {p['title'][:60]}")
+                print(f"    -> [{p.get('score', 0)}] {p['title'][:60]}")
                 print(f"       {p.get('url', '')}")
 
         if p1:
-            print("\n  [P1 重要]")
+            print("\n  [P1 Important]")
             for p in p1:
-                print(f"    -> [{p.get('score', 0)}分] {p['title'][:60]}")
+                print(f"    -> [{p.get('score', 0)}] {p['title'][:60]}")
 
         if p2:
-            print(f"\n  [P2 观察] {len(p2)} 条（省略）")
+            print(f"\n  [P2 Monitor] {len(p2)} (omitted)")
 
         print(f"\n{'='*60}\n")

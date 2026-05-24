@@ -1,0 +1,25 @@
+# -*- coding: utf-8 -*-
+# 内蒙古自治区 - Policy Monitor Region Config
+# Auto-generated on 2026-05-24
+
+name: 内蒙古自治区
+aliases: ['内蒙古', '蒙', 'neimenggu', 'inner_mongolia']
+parent_province: null
+
+sources:
+  # State Council API search (reliable, always works)
+  - name: "StateCouncil-内蒙古"
+    url: "https://sousuo.www.gov.cn/search-gov/data?t=zhengcelibrary_gwyzcwjk&q=内蒙古自治区&timetype=timeqb&sort=pubtime&sortType=1&searchfield=title&p=0&n=20"
+    type: "api"
+    frequency: "weekly"
+    enabled: true
+    note: "State Council policy library, filtered by 内蒙古自治区"
+  # Provincial government portal (HTML)
+  - name: "内蒙古Government"
+    url: "http://www.nmg.gov.cn/zwgk/zfxxgk/"
+    type: "html"
+    frequency: "weekly"
+    selectors:
+      list: ".list_content li a, .news-list li a"
+    enabled: true
+    note: "内蒙古自治区 government portal"

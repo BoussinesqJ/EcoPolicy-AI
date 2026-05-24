@@ -1,0 +1,25 @@
+# -*- coding: utf-8 -*-
+# 天津市 - Policy Monitor Region Config
+# Auto-generated on 2026-05-24
+
+name: 天津市
+aliases: ['天津', '津', 'tianjin']
+parent_province: null
+
+sources:
+  # State Council API search (reliable, always works)
+  - name: "StateCouncil-天津"
+    url: "https://sousuo.www.gov.cn/search-gov/data?t=zhengcelibrary_gwyzcwjk&q=天津市&timetype=timeqb&sort=pubtime&sortType=1&searchfield=title&p=0&n=20"
+    type: "api"
+    frequency: "weekly"
+    enabled: true
+    note: "State Council policy library, filtered by 天津市"
+  # Provincial government portal (HTML)
+  - name: "天津Government"
+    url: "http://www.tj.gov.cn/zwgk/zcfg/"
+    type: "html"
+    frequency: "weekly"
+    selectors:
+      list: ".list_content li a, .news-list li a"
+    enabled: true
+    note: "天津市 government portal"

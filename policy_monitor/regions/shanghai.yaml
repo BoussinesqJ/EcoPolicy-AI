@@ -1,0 +1,25 @@
+# -*- coding: utf-8 -*-
+# 上海市 - Policy Monitor Region Config
+# Auto-generated on 2026-05-24
+
+name: 上海市
+aliases: ['上海', '沪', 'shanghai']
+parent_province: null
+
+sources:
+  # State Council API search (reliable, always works)
+  - name: "StateCouncil-上海"
+    url: "https://sousuo.www.gov.cn/search-gov/data?t=zhengcelibrary_gwyzcwjk&q=上海市&timetype=timeqb&sort=pubtime&sortType=1&searchfield=title&p=0&n=20"
+    type: "api"
+    frequency: "weekly"
+    enabled: true
+    note: "State Council policy library, filtered by 上海市"
+  # Provincial government portal (HTML)
+  - name: "上海Government"
+    url: "https://www.shanghai.gov.cn/nw12344/index.html"
+    type: "html"
+    frequency: "weekly"
+    selectors:
+      list: ".list_content li a, .news-list li a"
+    enabled: true
+    note: "上海市 government portal"

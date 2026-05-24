@@ -1,0 +1,25 @@
+# -*- coding: utf-8 -*-
+# 北京市 - Policy Monitor Region Config
+# Auto-generated on 2026-05-24
+
+name: 北京市
+aliases: ['北京', '京', 'beijing']
+parent_province: null
+
+sources:
+  # State Council API search (reliable, always works)
+  - name: "StateCouncil-北京"
+    url: "https://sousuo.www.gov.cn/search-gov/data?t=zhengcelibrary_gwyzcwjk&q=北京市&timetype=timeqb&sort=pubtime&sortType=1&searchfield=title&p=0&n=20"
+    type: "api"
+    frequency: "weekly"
+    enabled: true
+    note: "State Council policy library, filtered by 北京市"
+  # Provincial government portal (HTML)
+  - name: "北京Government"
+    url: "http://www.beijing.gov.cn/zhengce/zhengcefagui/"
+    type: "html"
+    frequency: "weekly"
+    selectors:
+      list: ".list_content li a, .news-list li a"
+    enabled: true
+    note: "北京市 government portal"

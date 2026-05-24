@@ -195,15 +195,15 @@ def show_stats(config: dict):
     stats = db.stats()
 
     print(f"\n{'='*50}")
-    print(f"  政策数据库统计")
+    print(f"  Policy Database Statistics")
     print(f"{'='*50}")
-    print(f"  总计: {stats['total']} 条")
-    print(f"  P0 紧急: {stats['P0']} 条")
-    print(f"  P1 重要: {stats['P1']} 条")
-    print(f"  P2 观察: {stats['P2']} 条")
-    print(f"\n  按来源:")
+    print(f"  Total: {stats['total']}")
+    print(f"  P0 Critical: {stats['P0']}")
+    print(f"  P1 Important: {stats['P1']}")
+    print(f"  P2 Monitor: {stats['P2']}")
+    print(f"\n  By source:")
     for source, count in stats["by_source"].items():
-        print(f"    {source}: {count} 条")
+        print(f"    {source}: {count}")
     print(f"{'='*50}\n")
 
     db.close()
@@ -212,7 +212,7 @@ def show_stats(config: dict):
 def export_data(config: dict):
     db = PolicyDatabase(str(DB_PATH), str(DATA_DIR))
     db.export_all()
-    print(f"数据已导出到: {DATA_DIR}")
+    print(f"Data exported to: {DATA_DIR}")
     db.close()
 
 
@@ -222,20 +222,20 @@ def list_regions(config: dict):
     regions = list_all_regions(str(regions_dir))
 
     if not regions:
-        print("\n  暂无已配置的省市地区。")
+        print("\n  No regions configured.")
         return
 
     print(f"\n{'='*60}")
-    print(f"  已配置的省市地区（共 {len(regions)} 个）")
+    print(f"  Configured Regions ({len(regions)} total)")
     print(f"{'='*60}")
-    print(f"  {'地区':<10} {'别名':<20} {'数据源数':<8} {'上级省份'}")
+    print(f"  {'Region':<10} {'Aliases':<20} {'Sources':<8} {'Parent'}")
     print(f"  {'-'*10} {'-'*20} {'-'*8} {'-'*10}")
     for r in regions:
         aliases = ", ".join(r["aliases"][:3])
         parent = r.get("parent_province") or "-"
         print(f"  {r['name']:<10} {aliases:<20} {r['source_count']:<8} {parent}")
-    print(f"\n  用法: python main.py run --region <地区名>")
-    print(f"  示例: python main.py run --region 湖北")
+    print(f"\n  Usage: python main.py run --region <region_name>")
+    print(f"  Example: python main.py run --region Hubei")
     print(f"{'='*60}\n")
 
 
@@ -246,10 +246,10 @@ def list_industries():
     profiles = ind_matcher.list_industries()
 
     print(f"\n{'='*60}")
-    print(f"  产业分类体系（共 {len(profiles)} 个子行业）")
+    print(f"  Industry Classification ({len(profiles)} sub-industries)")
     print(f"{'='*60}")
 
-    # 按大类分组
+    # Group by category
     by_category = {}
     for p in profiles:
         cat = p["category"]
@@ -259,64 +259,64 @@ def list_industries():
 
     for prefix, cat_name in prefixes.items():
         items = by_category.get(cat_name, [])
-        print(f"\n  [{prefix}] {cat_name}（{len(items)} 个子行业）")
+        print(f"\n  [{prefix}] {cat_name} ({len(items)} sub-industries)")
         for item in items:
             sub_prefix = item["id"].split(".", 1)[1] if "." in item["id"] else item["id"]
-            print(f"    - {item['name']:<16} 关键词关联部门: {item['dept_count']} 个")
+            print(f"    - {item['name']:<16} departments: {item['dept_count']}")
 
     print(f"\n{'='*60}")
-    print(f"  用法:")
-    print(f"    python main.py run --industry strategic_emerging     战略性新兴产业")
-    print(f"    python main.py run --industry future_industries     未来产业")
-    print(f"    python main.py run --industry traditional_manufacturing  传统制造业")
-    print(f"    python main.py run --industry infrastructure       基础设施")
-    print(f"    python main.py run --industry three_industries     三次产业")
+    print(f"  Usage:")
+    print(f"    python main.py run --industry strategic_emerging")
+    print(f"    python main.py run --industry future_industries")
+    print(f"    python main.py run --industry traditional_manufacturing")
+    print(f"    python main.py run --industry infrastructure")
+    print(f"    python main.py run --industry three_industries")
     print(f"{'='*60}\n")
 
 
 def main():
     parser = argparse.ArgumentParser(
-        description="政策监控系统 - 抓取国家/省市政策资讯，支持产业分类匹配",
+        description="Policy Monitor - Crawl national/provincial policy feeds with industry classification matching",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
-示例:
-  python main.py run                                      只抓国家级数据源
-  python main.py run --region 湖北                        抓取国家级 + 湖北省
-  python main.py run --industry strategic_emerging        只看战略性新兴产业
-  python main.py run --region 恩施 --industry three_industries  湖北恩施 + 三次产业
-  python main.py stats                                    显示数据库统计
-  python main.py export                                   导出最新数据
-  python main.py list-regions                             列出所有已配置省市
-  python main.py list-industries                          列出产业分类体系
+Examples:
+  python main.py run                                      National sources only
+  python main.py run --region Hubei                       National + Hubei province
+  python main.py run --industry strategic_emerging        Strategic emerging industries
+  python main.py run --region Enshi --industry three_industries  Hubei Enshi + three industries
+  python main.py stats                                    Show database statistics
+  python main.py export                                   Export latest data
+  python main.py list-regions                             List all configured regions
+  python main.py list-industries                          List industry classification
         """,
     )
 
-    subparsers = parser.add_subparsers(dest="command", help="命令")
+    subparsers = parser.add_subparsers(dest="command", help="Command")
 
-    # run 子命令
-    run_parser = subparsers.add_parser("run", help="运行一次抓取")
+    # run subcommand
+    run_parser = subparsers.add_parser("run", help="Run one crawl")
     run_parser.add_argument(
         "--region", "-r",
         type=str, default=None,
-        help="指定省市地区（如：湖北、恩施、海南）",
+        help="Specify region (e.g. Hubei, Enshi, Hainan)",
     )
     run_parser.add_argument(
         "--industry", "-i",
         type=str, default=None,
-        help="指定产业分类（如：strategic_emerging、future_industries）",
+        help="Specify industry (e.g. strategic_emerging, future_industries)",
     )
 
-    # stats 子命令
-    subparsers.add_parser("stats", help="显示数据库统计")
+    # stats subcommand
+    subparsers.add_parser("stats", help="Show database statistics")
 
-    # export 子命令
-    subparsers.add_parser("export", help="导出最新数据")
+    # export subcommand
+    subparsers.add_parser("export", help="Export latest data")
 
-    # list-regions 子命令
-    subparsers.add_parser("list-regions", help="列出所有已配置省市")
+    # list-regions subcommand
+    subparsers.add_parser("list-regions", help="List all configured regions")
 
-    # list-industries 子命令
-    subparsers.add_parser("list-industries", help="列出产业分类体系")
+    # list-industries subcommand
+    subparsers.add_parser("list-industries", help="List industry classification")
 
     args = parser.parse_args()
 
@@ -337,7 +337,7 @@ def main():
     elif args.command == "list-industries":
         list_industries()
     else:
-        print(f"未知命令: {args.command}")
+        print(f"Unknown command: {args.command}")
         sys.exit(1)
 
 

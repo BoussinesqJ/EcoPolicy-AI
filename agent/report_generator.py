@@ -175,6 +175,31 @@ recommendation: "{m.recommendation}"
 
 ---
 
+---
+
+## 八、反馈
+
+> 审阅本简报后，请提交您的反馈，帮助系统持续优化。
+
+**采纳/拒绝**:
+```
+python -m agent.agent feedback --policy-hash {m.policy_url_hash} --enterprise {m.enterprise_id} --action accepted
+python -m agent.agent feedback --policy-hash {m.policy_url_hash} --enterprise {m.enterprise_id} --action rejected --detail "原因"
+```
+
+**更新申报结果**（采纳后使用）:
+```
+python -m agent.agent outcome --policy-hash {m.policy_url_hash} --enterprise {m.enterprise_id} --result submitted
+python -m agent.agent outcome --policy-hash {m.policy_url_hash} --enterprise {m.enterprise_id} --result approved
+```
+
+**事后评分**:
+```
+python -m agent.agent score --policy-hash {m.policy_url_hash} --enterprise {m.enterprise_id} --accuracy 4 --usefulness 5 --notes "备注"
+```
+
+---
+
 *本简报由 EcoPolicy Agent 自动生成。深度分析需人工触发。*
 """
 

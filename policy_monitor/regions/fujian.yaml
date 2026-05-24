@@ -1,0 +1,25 @@
+# -*- coding: utf-8 -*-
+# 福建省 - Policy Monitor Region Config
+# Auto-generated on 2026-05-24
+
+name: 福建省
+aliases: ['福建', '闽', 'fujian']
+parent_province: null
+
+sources:
+  # State Council API search (reliable, always works)
+  - name: "StateCouncil-福建"
+    url: "https://sousuo.www.gov.cn/search-gov/data?t=zhengcelibrary_gwyzcwjk&q=福建省&timetype=timeqb&sort=pubtime&sortType=1&searchfield=title&p=0&n=20"
+    type: "api"
+    frequency: "weekly"
+    enabled: true
+    note: "State Council policy library, filtered by 福建省"
+  # Provincial government portal (HTML)
+  - name: "福建Government"
+    url: "https://www.fujian.gov.cn/zwgk/zfxxgkml/zcfg/"
+    type: "html"
+    frequency: "weekly"
+    selectors:
+      list: ".list_content li a, .news-list li a"
+    enabled: true
+    note: "福建省 government portal"

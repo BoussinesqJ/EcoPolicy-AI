@@ -9,13 +9,15 @@
 
 ## 核心功能
 
-- **政策监控**：自动抓取国家级政策源，支持 37+ 数据源（国务院 API × 32 + 已验证 HTML × 5）
+- **政策监控**：自动抓取国家级政策源，支持 37+ 国家数据源（国务院 API × 32 + 已验证 HTML × 5）+ 31 省级区域数据源
 - **智能匹配**：PolicyMatch Matrix 四维引擎（技术/生产/市场/资本），将政策与企业画像精准匹配
 - **AI 深度分析**：六步标准工作流，从政策解读到行动清单的完整决策支持
 - **多行业覆盖**：内置 5 大产业分类（战略性新兴产业/未来产业/传统制造业/基础设施/三次产业），43 个子行业
 - **7 大行业分析框架**：种业/制造业/数字经济/新能源/生物医药/新材料/轻资产，每行业 40+ 专业关键词
 - **轻资产适配**：支持平台型/SaaS/服务型企业，自动切换数字资产分析维度
-- **区域扩展**：三级抓取模式（国家→省→市），配置即用，支持任意省市
+- **区域扩展**：覆盖全国 31 个省级行政区（4 直辖市 + 22 省 + 5 自治区），三级链式抓取（国家→省→市）
+- **反馈闭环**：简报审阅 → 采纳/拒绝 → 申报追踪 → 结果评分 → 持续优化
+- **定时调度**：支持 Python 内置调度 / Windows Task Scheduler / Linux cron
 - **安全合规**：robots.txt 遵守、限速抓取、无 JS 执行，零法律风险
 
 ---
@@ -31,11 +33,13 @@ pip install -r requirements.txt
 ### 2. 运行政策监控
 
 ```bash
-# 全国级别（25 个数据源）
+# 全国级别（37 个数据源）
 python -m policy_monitor.main run
 
-# 指定省市
+# 指定省市（覆盖全国 31 个省级行政区）
 python -m policy_monitor.main run --region 湖北
+python -m policy_monitor.main run --region beijing
+python -m policy_monitor.main run --region 四川
 
 # 按产业分类筛选
 python -m agent.agent run --industry strategic_emerging
@@ -57,7 +61,42 @@ python -m agent.agent run
 python -m agent.agent match
 ```
 
-### 4. 新企业建档
+### 4. 反馈管理
+
+```bash
+# 提交简报审阅反馈（采纳/拒绝）
+python -m agent.agent feedback --policy-hash <hash> --enterprise <id> --action accepted
+
+# 更新申报结果
+python -m agent.agent outcome --policy-hash <hash> --enterprise <id> --result approved
+
+# 事后评分（AI 准确性 + 分析有用性）
+python -m agent.agent score --policy-hash <hash> --enterprise <id> --accuracy 4 --usefulness 5
+
+# 查看反馈统计
+python -m agent.agent feedback-stats
+```
+
+### 5. 定时调度
+
+```bash
+# Python 调度器（前台运行，每 6 小时）
+python -m agent.agent schedule
+
+# 每 12 小时运行一次
+python -m agent.agent schedule --interval 12
+
+# 查看调度状态
+python -m agent.agent schedule-status
+
+# 生成 Windows 计划任务命令
+python -m agent.scheduler setup-windows
+
+# 生成 Linux cron 命令
+python -m agent.scheduler setup-cron
+```
+
+### 6. 新企业建档
 
 复制 `enterprises/_template/profile.yaml`，填入企业数据，放入 `enterprises/` 目录即可。
 
@@ -73,6 +112,8 @@ EcoPolicy-AI/
 │   ├── enterprise_matcher.py    企业匹配引擎
 │   ├── report_generator.py      报告生成器
 │   ├── agent_notifier.py        通知器
+│   ├── feedback.py              反馈管理器
+│   ├── scheduler.py             定时调度器
 │   └── state.py                 状态管理
 │
 ├── policy_monitor/            政策监控爬虫
@@ -152,15 +193,22 @@ Step 1: 政策录入 → Step 2: 画像匹配 → Step 3: 多维拆解
 
 ### 添加新省份
 
-在 `policy_monitor/regions/` 下新建 YAML 文件，参考 `hubei.yaml` 格式：
+已预配置 31 个省级行政区。如需添加，参考现有文件格式（如 `beijing.yaml`）：
 
 ```yaml
-name: "四川省"
-aliases: ["四川", "川", "蜀"]
+name: "New Province"
+aliases: ["alias1", "alias2", "pinyin"]
+parent_province: null
 sources:
-  - name: "四川省发改委"
-    type: "rss"
-    url: "https://example.gov.cn/rss"
+  - name: "StateCouncil-ProvinceName"
+    url: "https://sousuo.www.gov.cn/search-gov/data?t=zhengcelibrary_gwyzcwjk&q=ProvinceName&..."
+    type: api
+    enabled: true
+  - name: "Province Government"
+    url: "https://www.province.gov.cn/"
+    type: html
+    selectors:
+      list: ".list_content li a"
     enabled: true
 ```
 
@@ -227,28 +275,35 @@ MIT License — 详见 [LICENSE](LICENSE) 文件。
 ### Phase 1: Foundation [DONE]
 
 - [x] Policy monitoring tool (fetcher + parsers + database)
-- [x] 25 national/provincial data sources
+- [x] 37 national data sources (State Council API x 32 + HTML x 5)
+- [x] 31 provincial region configurations (all mainland provinces/municipalities/autonomous regions)
 - [x] Industry classification system (5 categories, 43 sub-industries)
 - [x] Agent orchestration system (scanner + matcher + report + notifier)
-- [x] Enterprise profile template (10 dimensions)
+- [x] Enterprise profile template (10 dimensions + business model for asset-light)
+- [x] 7 industry-specific analysis frameworks (40+ keywords each)
 - [x] Standard analysis workflow (6 steps)
-- [x] Output standards (scoring, priority, formatting)
+- [x] Output standards (5-point scoring, P0/P1/P2 priority, formatting)
 - [x] 3 demo case studies
+- [x] CLI English localization (all terminal output in English)
 
-### Phase 2: Validation & Optimization [IN PROGRESS]
+### Phase 2: Validation & Optimization [DONE]
 
-- [x] Multi-industry case validation (seeds + manufacturing + digital economy + new energy + biomaterials)
-- [x] GitHub repository setup
-- [ ] Feedback mechanism design (track application results vs recommendations)
-- [ ] Accuracy statistics and analysis weight optimization
-- [ ] Scheduled task integration (Windows Task Scheduler / cron)
+- [x] Multi-industry case validation (5 industries: manufacturing, digital economy, new energy, biopharma, new materials)
+- [x] GitHub repository setup and initial push
+- [x] 3 new data sources (medical devices, healthcare insurance, data governance)
+- [x] Industry depth enhancement (7 dimension-specific keyword systems)
+- [x] Asset-light industry adaptation (platform/SaaS/service business models)
+- [x] Feedback mechanism (accept/reject tracking + outcome recording + accuracy scoring)
+- [x] Scheduled task integration (Python scheduler + Windows Task Scheduler + Linux cron)
+- [x] Security review automation (`security_review.py`)
+- [ ] Enterprise multi-profile isolation test (2nd enterprise)
 
 ### Phase 3: Agent Enhancement [PLANNED]
 
 - [ ] Multi-turn conversation support for deep analysis
 - [ ] Application draft generation (feasibility report outlines)
-- [ ] Batch matching (one policy against all enterprises)
-- [ ] Historical policy trend analysis
+- [ ] Batch matching (one enterprise against multiple policies, ranked by priority)
+- [ ] Historical policy trend analysis and change tracking
 - [ ] Cross-region policy comparison
 
 ### Phase 4: Interface & API [PLANNED]

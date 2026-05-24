@@ -35,9 +35,9 @@ class AgentNotifier:
         else:
             logger.info("本次无新匹配结果")
             if scan_stats:
-                print(f"\n  扫描完成: {scan_stats.get('policies_scanned', 0)} 条已扫描, "
-                      f"{scan_stats.get('policies_new', 0)} 条新增")
-                print(f"  无新的高匹配度政策\n")
+                print(f"\n  Scan complete: {scan_stats.get('policies_scanned', 0)} scanned, "
+                      f"{scan_stats.get('policies_new', 0)} new")
+                print(f"  No new high-match policies\n")
 
     def _print_digest(self, matches: list, scan_stats: dict = None):
         """控制台输出摘要"""
@@ -49,23 +49,23 @@ class AgentNotifier:
         rec3 = sum(1 for m in matches if m.recommendation_score == 3)
 
         print(f"\n{'=' * 60}")
-        print(f"  EcoPolicy Agent - 匹配摘要  {now}")
+        print(f"  EcoPolicy Agent - Match Summary  {now}")
         print(f"{'=' * 60}")
         if scan_stats:
-            print(f"  扫描: {scan_stats.get('policies_scanned', 0)} 条 | "
-                  f"新增: {scan_stats.get('policies_new', 0)} 条")
-        print(f"  匹配: {len(matches)} 条 (5/5: {rec5} | 4/5: {rec4} | 3/5: {rec3})")
-        print(f"  优先级: P0={p0_count} | P1={p1_count}")
+            print(f"  Scanned: {scan_stats.get('policies_scanned', 0)} | "
+                  f"New: {scan_stats.get('policies_new', 0)}")
+        print(f"  Matches: {len(matches)} (5/5: {rec5} | 4/5: {rec4} | 3/5: {rec3})")
+        print(f"  Priority: P0={p0_count} | P1={p1_count}")
         print(f"{'-' * 60}")
 
         # 按推荐等级分组输出
-        for level, label in [(5, "5/5 首选推荐"), (4, "4/5 强烈推荐"), (3, "3/5 推荐")]:
+        for level, label in [(5, "5/5 Top Pick"), (4, "4/5 Strongly Recommended"), (3, "3/5 Recommended")]:
             group = [m for m in matches if m.recommendation_score == level]
             if group:
                 print(f"\n  [{label}]")
                 for m in group:
                     print(f"    {m.enterprise_name}: {m.policy_title[:45]}")
-                    print(f"      评分: {m.score_total}/20 "
+                    print(f"      Score: {m.score_total}/20 "
                           f"(T{m.score_tech} P{m.score_prod} M{m.score_mkt} C{m.score_cap}) "
                           f"| {m.urgency}")
 

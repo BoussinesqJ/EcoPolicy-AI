@@ -1,0 +1,25 @@
+# -*- coding: utf-8 -*-
+# 山东省 - Policy Monitor Region Config
+# Auto-generated on 2026-05-24
+
+name: 山东省
+aliases: ['山东', '鲁', 'shandong']
+parent_province: null
+
+sources:
+  # State Council API search (reliable, always works)
+  - name: "StateCouncil-山东"
+    url: "https://sousuo.www.gov.cn/search-gov/data?t=zhengcelibrary_gwyzcwjk&q=山东省&timetype=timeqb&sort=pubtime&sortType=1&searchfield=title&p=0&n=20"
+    type: "api"
+    frequency: "weekly"
+    enabled: true
+    note: "State Council policy library, filtered by 山东省"
+  # Provincial government portal (HTML)
+  - name: "山东Government"
+    url: "http://www.shandong.gov.cn/dt/tzgg/"
+    type: "html"
+    frequency: "weekly"
+    selectors:
+      list: ".list_content li a, .news-list li a"
+    enabled: true
+    note: "山东省 government portal"
