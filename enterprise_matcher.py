@@ -1,20 +1,14 @@
 # -*- coding: utf-8 -*-
 """
-企业级政策匹配器
+企业级政策匹配器 (v4.0 六层评分体系)
 
-基于 PolicyMatch Matrix 四维分析框架，将政策与企业画像进行深度匹配:
-  Step 1: 硬性条件逐条比对（注册地/资本/行业/资质）
-  Step 2: 行业框架选取（从 industries.yaml 匹配）
-  Step 3: 四维评分（Tech/Prod/Mkt/Cap）
-  Step 4: 推荐等级计算（5/5, 4/5, 3/5）
-
-评分体系:
-  Tech(技术端) + Prod(生产端) + Mkt(市场端) + Cap(资本端) = 总分/20
-  17-20 → 5/5 首选推荐
-  13-16 → 4/5 强烈推荐
-   9-12 → 3/5 推荐
-   5-8  → 2/5 不推荐
-   1-4  → 1/5 不匹配
+六层评价体系:
+  Layer 1: 维度评分 — Tech/Prod/Mkt/Cap 四维各 0-5 分
+  Layer 2: 可调权重 — 行业默认 + 用户偏好覆盖
+  Layer 3: 成功概率 — 硬性条件 + 竞争 + 窗口 + 准备度
+  Layer 4: ROI 量化 — 预期收益 x 成功概率 / 投入成本
+  Layer 5: 提升路径 — 差距分析 + 难度 + 时间 + 成本
+  Layer 6: 人工偏好 — 必选/可选/风险/时间/地域/排除
 """
 
 import json
@@ -31,7 +25,7 @@ logger = logging.getLogger("agent.matcher")
 
 @dataclass
 class MatchResult:
-    """单条政策 x 单个企业的匹配结果"""
+    """单条政策 x 单个企业的匹配结果 (v4.0 六层评分)"""
     policy_url_hash: str
     policy_title: str
     policy_url: str
@@ -41,23 +35,47 @@ class MatchResult:
     enterprise_id: str
     enterprise_name: str
 
-    # 硬性条件
-    hard_conditions_pass: bool = False
-    hard_conditions_detail: dict = field(default_factory=dict)
-
-    # 四维评分
+    # Layer 1: 维度评分
     score_tech: int = 0
     score_prod: int = 0
     score_mkt: int = 0
     score_cap: int = 0
     score_total: int = 0
 
-    # 推荐等级
+    # 硬性条件
+    hard_conditions_pass: bool = False
+    hard_conditions_detail: dict = field(default_factory=dict)
+
+    # Layer 2: 加权总分
+    weighted_score: float = 0.0       # 加权后的 0-5 分
+    weights_used: dict = field(default_factory=dict)  # 实际使用的权重
+
+    # Layer 3: 成功概率
+    success_probability: float = 0.0  # 0-1
+    hard_pass_rate: str = ""          # "X/Y 通过"
+    probability_factors: list = field(default_factory=list)
+
+    # Layer 4: ROI 量化
+    roi_ratio: float = 0.0
+    roi_verdict: str = ""
+    roi_detail: dict = field(default_factory=dict)
+
+    # Layer 5: 提升路径
+    improvement_paths: list = field(default_factory=list)
+
+    # Layer 6: 偏好过滤
+    preference_match: bool = True     # 是否通过偏好过滤
+    preference_notes: list = field(default_factory=list)
+
+    # 推荐等级（综合六层后）
     recommendation: str = ""
     recommendation_score: int = 0   # 5, 4, 3, 2, 1
 
     # 紧迫度
     urgency: str = "P2"
+
+    # P0: 不推荐原因（当 recommendation_score <= 2 时自动生成）
+    rejection_reasons: list = field(default_factory=list)
 
     # 匹配的关键信息
     matched_keywords: list = field(default_factory=list)
@@ -78,16 +96,35 @@ class MatchResult:
             "policy_summary": self.policy_summary,
             "enterprise_id": self.enterprise_id,
             "enterprise_name": self.enterprise_name,
-            "hard_conditions_pass": int(self.hard_conditions_pass),
-            "hard_conditions_detail": self.hard_conditions_detail,
+            # Layer 1
             "score_tech": self.score_tech,
             "score_prod": self.score_prod,
             "score_mkt": self.score_mkt,
             "score_cap": self.score_cap,
             "score_total": self.score_total,
+            "hard_conditions_pass": int(self.hard_conditions_pass),
+            "hard_conditions_detail": self.hard_conditions_detail,
+            # Layer 2
+            "weighted_score": round(self.weighted_score, 2),
+            "weights_used": self.weights_used,
+            # Layer 3
+            "success_probability": round(self.success_probability, 2),
+            "hard_pass_rate": self.hard_pass_rate,
+            "probability_factors": self.probability_factors,
+            # Layer 4
+            "roi_ratio": round(self.roi_ratio, 2),
+            "roi_verdict": self.roi_verdict,
+            "roi_detail": self.roi_detail,
+            # Layer 5
+            "improvement_paths": self.improvement_paths,
+            # Layer 6
+            "preference_match": self.preference_match,
+            "preference_notes": self.preference_notes,
+            # Final
             "recommendation": self.recommendation,
             "recommendation_score": self.recommendation_score,
             "urgency": self.urgency,
+            "rejection_reasons": self.rejection_reasons,
             "matched_keywords": self.matched_keywords,
             "opportunities": self.opportunities,
             "risks": self.risks,
@@ -299,22 +336,25 @@ INDUSTRY_DIMENSIONS = {
                        "矿山信息化", "工业互联网"],
         },
         "prod": {
-            "high": ["生态修复", "绿色矿山", "矿区治理", "塌陷区修复",
-                     "矿井水处理", "煤矸石利用"],
+            "high": ["生态修复", "生态治理", "生态恢复", "矿山修复", "矿山治理",
+                     "矿区治理", "塌陷区修复", "沉陷区治理",
+                     "绿色矿山", "矿井水处理", "煤矸石利用"],
             "medium": ["工程设计", "工程咨询", "工程总承包", "施工图审查",
-                       "项目管理", "环境影响评价"],
+                       "项目管理", "环境影响评价", "地质灾害治理"],
         },
         "mkt": {
             "high": ["煤矿安全生产", "煤炭清洁利用", "碳减排",
-                     "矿山修复", "资源综合利用", "生态治理"],
+                     "资源综合利用", "矿山生态修复", "土壤修复",
+                     "水土保持", "植被恢复"],
             "medium": ["煤炭交易", "煤化工", "煤电联营", "矿产资源",
-                       "采矿权", "探矿权"],
+                       "采矿权", "探矿权", "地质勘查"],
         },
         "cap": {
             "high": ["能源基金", "绿色发展基金", "生态修复资金",
-                     "安全生产补贴", "煤炭转型升级"],
+                     "安全生产补贴", "煤炭转型升级",
+                     "矿山生态补偿", "绿色债券"],
             "medium": ["技改贴息", "设备更新贷款", "产业引导基金",
-                       "科技创新补贴"],
+                       "科技创新补贴", "环保专项资金"],
         },
     },
     # v3.0 新增：轻资产/平台型（适用于数字经济、咨询服务、SaaS等）
@@ -363,7 +403,7 @@ class EnterpriseMatcher:
         self._load_enterprises()
 
     def _load_enterprises(self):
-        """加载所有企业画像"""
+        """加载所有企业画像 + 偏好配置"""
         if not self.enterprises_dir.exists():
             logger.warning(f"企业目录不存在: {self.enterprises_dir}")
             return
@@ -375,10 +415,20 @@ class EnterpriseMatcher:
                     try:
                         with open(profile_path, "r", encoding="utf-8") as f:
                             profile = yaml.safe_load(f)
+
+                        # v4.0: 加载偏好配置
+                        prefs = {}
+                        prefs_path = entry / "preferences.yaml"
+                        if prefs_path.exists():
+                            with open(prefs_path, "r", encoding="utf-8") as f:
+                                prefs = yaml.safe_load(f) or {}
+                            logger.info(f"已加载企业偏好: {entry.name}")
+
                         self.enterprises[entry.name] = {
                             "id": entry.name,
                             "dir": entry,
                             "profile": profile,
+                            "preferences": prefs,
                         }
                         name = profile.get("basic_info", {}).get("short_name", entry.name)
                         logger.info(f"已加载企业画像: {name} ({entry.name})")
@@ -420,34 +470,14 @@ class EnterpriseMatcher:
         return results
 
     def _match_single(self, policy: dict, enterprise: dict) -> Optional[MatchResult]:
-        """单条政策 x 单个企业的匹配"""
+        """单条政策 x 单个企业的匹配 (v4.0 六层评分)"""
         profile = enterprise["profile"]
+        prefs = enterprise.get("preferences", {})
         ent_id = enterprise["id"]
         ent_name = profile.get("basic_info", {}).get("short_name", ent_id)
 
-        # Step 1: 硬性条件检查
-        hard_pass, hard_detail = self._check_hard_conditions(policy, profile)
-
-        # Step 2: 四维评分
-        tech, prod, mkt, cap, matched_kw, opps, risks = self._score_dimensions(
-            policy, profile
-        )
-        total = tech + prod + mkt + cap
-
-        # Step 3: 推荐等级
-        rec_score = self._calculate_recommendation(total)
-        rec_text = self._recommendation_text(rec_score)
-
-        # Step 4: 紧迫度
-        urgency = policy.get("priority", "P2")
-
-        # 硬性条件不通过时降低推荐等级
-        if not hard_pass:
-            rec_score = min(rec_score, 3)
-            rec_text = self._recommendation_text(rec_score)
-
         url = policy.get("url", "")
-        return MatchResult(
+        result = MatchResult(
             policy_url_hash=_hash_url(url) if url else "",
             policy_title=policy.get("title", ""),
             policy_url=url,
@@ -456,20 +486,82 @@ class EnterpriseMatcher:
             policy_summary=policy.get("summary", ""),
             enterprise_id=ent_id,
             enterprise_name=ent_name,
-            hard_conditions_pass=hard_pass,
-            hard_conditions_detail=hard_detail,
-            score_tech=tech,
-            score_prod=prod,
-            score_mkt=mkt,
-            score_cap=cap,
-            score_total=total,
-            recommendation=rec_text,
-            recommendation_score=rec_score,
-            urgency=urgency,
-            matched_keywords=matched_kw,
-            opportunities=opps,
-            risks=risks,
+            urgency=policy.get("priority", "P2"),
         )
+
+        # Layer 1: 维度评分
+        tech, prod, mkt, cap, matched_kw, opps, risks = self._score_dimensions(policy, profile)
+        result.score_tech = tech
+        result.score_prod = prod
+        result.score_mkt = mkt
+        result.score_cap = cap
+        result.score_total = tech + prod + mkt + cap
+        result.matched_keywords = matched_kw
+        result.opportunities = opps
+        result.risks = risks
+
+        # 硬性条件检查
+        hard_pass, hard_detail = self._check_hard_conditions(policy, profile)
+        result.hard_conditions_pass = hard_pass
+        result.hard_conditions_detail = hard_detail
+
+        # Layer 2: 可调权重
+        weights = self._get_weights(prefs, profile)
+        result.weights_used = weights
+        result.weighted_score = self._calculate_weighted_score(
+            tech, prod, mkt, cap, weights
+        )
+
+        # P1: 快速淘汰 — 四维全零时跳过 L3-L6，直接给出不匹配结论
+        if tech == 0 and prod == 0 and mkt == 0 and cap == 0:
+            result.recommendation_score = 1
+            result.recommendation = "1/5 不匹配"
+            result.rejection_reasons = self._generate_rejection_reasons(result, policy, enterprise)
+            return result
+
+        # Layer 3: 成功概率
+        prob, factors, pass_rate = self._estimate_success_probability(
+            hard_pass, hard_detail, result.weighted_score, policy, profile
+        )
+        result.success_probability = prob
+        result.probability_factors = factors
+        result.hard_pass_rate = pass_rate
+
+        # Layer 4: ROI 量化
+        roi_ratio, roi_verdict, roi_detail = self._calculate_roi(
+            policy, profile, prob
+        )
+        result.roi_ratio = roi_ratio
+        result.roi_verdict = roi_verdict
+        result.roi_detail = roi_detail
+
+        # Layer 5: 提升路径
+        result.improvement_paths = self._generate_improvement_paths(
+            tech, prod, mkt, cap, weights, hard_detail
+        )
+
+        # Layer 6: 偏好过滤
+        pref_match, pref_notes = self._check_preferences(policy, prefs, result)
+        result.preference_match = pref_match
+        result.preference_notes = pref_notes
+
+        # 综合推荐等级（基于加权分 + 硬性条件 + 偏好）
+        rec_score = self._calculate_recommendation_from_weighted(
+            result.weighted_score, hard_pass, pref_match
+        )
+        result.recommendation_score = rec_score
+        result.recommendation = self._recommendation_text(rec_score)
+
+        # P0: 不推荐原因生成
+        if result.recommendation_score <= 2:
+            result.rejection_reasons = self._generate_rejection_reasons(result, policy, enterprise)
+
+        # 偏好过滤：不匹配的降级
+        if not pref_match:
+            result.recommendation_score = min(result.recommendation_score, 2)
+            result.recommendation = self._recommendation_text(result.recommendation_score)
+
+        return result
 
     def _check_hard_conditions(self, policy: dict, profile: dict) -> tuple:
         """硬性条件逐条比对
@@ -576,13 +668,31 @@ class EnterpriseMatcher:
         """检查注册地是否匹配"""
         if not registered_address:
             return True
-        # 如果政策提到该地区，或政策是全国性的
-        province = registered_address[:3]  # 取省份前3字
-        if province in text or "全国" in text:
+        # 政策是全国性的则通过
+        if "全国" in text:
             return True
         if not self._is_region_specific(text):
             return True  # 全国性政策
-        return province in text
+        # 尝试匹配省份名（支持 2-6 字的省名，如"湖北""内蒙古""黑龙江"）
+        province_prefixes = [
+            "内蒙古自治区", "广西壮族自治区", "西藏自治区",
+            "宁夏回族自治区", "新疆维吾尔自治区",
+            "北京市", "天津市", "上海市", "重庆市",
+            "河北省", "山西省", "辽宁省", "吉林省", "黑龙江省",
+            "江苏省", "浙江省", "安徽省", "福建省", "江西省",
+            "山东省", "河南省", "湖北省", "湖南省", "广东省",
+            "海南省", "四川省", "贵州省", "云南省", "陕西省",
+            "甘肃省", "青海省", "台湾省",
+        ]
+        for prefix in province_prefixes:
+            if registered_address.startswith(prefix):
+                return prefix in text
+        # 通用匹配：检查地址中的任何连续 2+ 字是否出现在政策文本中
+        for length in range(min(6, len(registered_address)), 1, -1):
+            candidate = registered_address[:length]
+            if len(candidate) >= 2 and candidate in text:
+                return True
+        return False
 
     def _extract_capital_requirement(self, text: str) -> int:
         """从政策文本中提取注册资本要求（万元）"""
@@ -640,9 +750,10 @@ class EnterpriseMatcher:
                 elif sector_key == "新材料":
                     sector_keywords.extend(["材料", "纤维", "合金", "复合材料"])
                 elif sector_key == "种业":
-                    sector_keywords.extend(["种", "农业", "育种", "种子"])
+                    sector_keywords.extend(["种业", "农业", "育种", "种子", "品种", "种植", "农学", "杂交"])
                 elif sector_key == "煤炭能源":
-                    sector_keywords.extend(["煤", "矿", "能源", "工程设计", "工程咨询", "生态修复"])
+                    sector_keywords.extend(["煤", "矿", "能源", "工程设计", "工程咨询",
+                                           "生态修复", "生态治理", "地质", "测绘"])
 
                 if any(kw in industry_sector for kw in sector_keywords):
                     industry_dims = dims
@@ -722,3 +833,377 @@ class EnterpriseMatcher:
             1: "1/5 不匹配",
         }
         return mapping.get(score, "未评估")
+
+    def _generate_rejection_reasons(self, result: MatchResult, policy: dict, enterprise: dict) -> list:
+        """当匹配度 <= 2/5 时，自动生成不推荐的具体原因
+
+        P0 改进：从"不推荐"变为"为什么不推荐 + 什么企业才适合"
+        """
+        reasons = []
+        profile = enterprise.get("profile", enterprise)
+        industry = profile.get("industry", {})
+        primary_sector = industry.get("primary_sector", "")
+        quals = profile.get("qualifications", {})
+        basic = profile.get("basic_info", {})
+
+        # 1. 行业不匹配
+        if result.score_total <= 4:
+            reasons.append({
+                "type": "行业不匹配",
+                "detail": f"企业主业为「{primary_sector}」，该政策面向的行业领域与企业核心业务不直接相关",
+                "suggestion": "此政策更适合对应行业的企业",
+            })
+
+        # 2. 硬性条件不通过
+        if not result.hard_conditions_pass:
+            failed = [k for k, v in result.hard_conditions_detail.items() if not v]
+            if failed:
+                reasons.append({
+                    "type": "硬性条件不满足",
+                    "detail": f"未满足：{', '.join(failed)}",
+                    "suggestion": "需要先补齐相关资质或条件",
+                })
+
+        # 3. 各维度均为零分
+        if result.score_tech == 0 and result.score_prod == 0 and result.score_mkt == 0 and result.score_cap == 0:
+            reasons.append({
+                "type": "全面无匹配",
+                "detail": "政策文本中的关键词与企业画像在技术/生产/市场/资本四个维度均无交集",
+                "suggestion": "企业与该政策方向存在本质差异，不建议投入资源申报",
+            })
+        else:
+            # 4. 部分维度有分但太低
+            zero_dims = []
+            dim_names = {"tech": "技术端", "prod": "生产端", "mkt": "市场端", "cap": "资本端"}
+            dim_scores = {"tech": result.score_tech, "prod": result.score_prod,
+                         "mkt": result.score_mkt, "cap": result.score_cap}
+            for dim, name in dim_names.items():
+                if dim_scores[dim] == 0:
+                    zero_dims.append(name)
+            if zero_dims:
+                reasons.append({
+                    "type": "关键维度缺失",
+                    "detail": f"{'、'.join(zero_dims)}与政策方向无关联",
+                    "suggestion": "如需申报，需在这些维度补充实质性能力",
+                })
+
+        return reasons
+
+    # ============================================================
+    # Layer 2: 可调权重
+    # ============================================================
+
+    # 行业默认权重
+    INDUSTRY_WEIGHTS = {
+        "种业": {"tech": 0.25, "prod": 0.30, "mkt": 0.25, "cap": 0.20},
+        "制造业": {"tech": 0.20, "prod": 0.35, "mkt": 0.25, "cap": 0.20},
+        "数字经济": {"tech": 0.35, "prod": 0.10, "mkt": 0.25, "cap": 0.30},
+        "新能源": {"tech": 0.25, "prod": 0.25, "mkt": 0.25, "cap": 0.25},
+        "生物医药": {"tech": 0.30, "prod": 0.15, "mkt": 0.25, "cap": 0.30},
+        "新材料": {"tech": 0.30, "prod": 0.25, "mkt": 0.25, "cap": 0.20},
+        "煤炭能源": {"tech": 0.25, "prod": 0.30, "mkt": 0.25, "cap": 0.20},
+        "轻资产": {"tech": 0.30, "prod": 0.10, "mkt": 0.30, "cap": 0.30},
+        "通用": {"tech": 0.25, "prod": 0.25, "mkt": 0.25, "cap": 0.25},
+    }
+
+    def _get_weights(self, prefs: dict, profile: dict) -> dict:
+        """获取最终权重：用户偏好 > 行业默认 > 通用默认"""
+        # 1. 用户偏好覆盖
+        user_weights = prefs.get("weights", {})
+        if user_weights and all(k in user_weights for k in ["tech", "prod", "mkt", "cap"]):
+            total = sum(user_weights.values())
+            if total > 0:
+                return {k: v / total for k, v in user_weights.items()}
+
+        # 2. 行业默认
+        sector = profile.get("industry", {}).get("primary_sector", "")
+        for industry_key, industry_weights in self.INDUSTRY_WEIGHTS.items():
+            if industry_key in sector or sector in industry_key:
+                return industry_weights.copy()
+
+        # 3. 通用默认
+        return self.INDUSTRY_WEIGHTS["通用"].copy()
+
+    def _calculate_weighted_score(self, tech, prod, mkt, cap, weights) -> float:
+        """计算加权总分（0-5 分制）"""
+        raw = (tech * weights["tech"] + prod * weights["prod"]
+               + mkt * weights["mkt"] + cap * weights["cap"])
+        return round(raw, 2)
+
+    # ============================================================
+    # Layer 3: 成功概率
+    # ============================================================
+
+    def _estimate_success_probability(self, hard_pass, hard_detail, weighted_score, policy, profile):
+        """估算成功概率（v4.0 动态化）
+
+        改进点:
+          - 企业资质评估从固定3项扩展为8项（含专利数/团队规模/成立年限等）
+          - 竞争度从固定值改为动态估算（根据政策级别+行业热度）
+          - 评分上限从62%提升到95%
+          - 每项因素的贡献更合理
+        """
+        factors = []
+
+        # 因素1: 硬性条件通过率（权重 30%）
+        total_conditions = len(hard_detail) if hard_detail else 1
+        passed_conditions = sum(1 for v in hard_detail.values() if v.get("通过", False))
+        hard_rate = passed_conditions / total_conditions if total_conditions > 0 else 0
+        factors.append(f"硬性条件: {passed_conditions}/{total_conditions} 通过 ({hard_rate:.0%})")
+
+        # 因素2: 匹配分数（权重 25%）
+        score_factor = min(1.0, weighted_score / 4.0)
+        factors.append(f"匹配分数: {weighted_score:.1f}/5 (权重因子: {score_factor:.0%})")
+
+        # 因素3: 企业资质储备（权重 25%）— v4.0 扩展为 8 项评估
+        quals = profile.get("qualifications", {})
+        basic = profile.get("basic_info", {})
+        innovation = profile.get("innovation", {})
+        qual_score = 0
+
+        # 基础资质
+        if quals.get("high_tech_enterprise"):
+            qual_score += 0.08
+            factors.append("高企认定: +8%")
+        if quals.get("specialized_new"):
+            qual_score += 0.08
+            factors.append("专精特新: +8%")
+        if quals.get("listed"):
+            qual_score += 0.05
+            factors.append("已挂牌/上市: +5%")
+
+        # 知识产权（v4.0 新增）
+        patents = innovation.get("patents", {})
+        if isinstance(patents, dict):
+            invention = patents.get("invention", 0)
+            utility = patents.get("utility_model", 0)
+            total_patents = invention + utility
+        elif isinstance(patents, int):
+            total_patents = patents
+        else:
+            total_patents = 0
+
+        if total_patents >= 10:
+            qual_score += 0.06
+            factors.append(f"知识产权({total_patents}项): +6%")
+        elif total_patents >= 3:
+            qual_score += 0.04
+            factors.append(f"知识产权({total_patents}项): +4%")
+        elif total_patents >= 1:
+            qual_score += 0.02
+            factors.append(f"知识产权({total_patents}项): +2%")
+
+        # 团队规模（v4.0 新增）
+        employees = basic.get("employee_count", 0)
+        if employees >= 200:
+            qual_score += 0.03
+            factors.append(f"团队规模({employees}人): +3%")
+        elif employees >= 50:
+            qual_score += 0.02
+            factors.append(f"团队规模({employees}人): +2%")
+
+        # 成立年限（v4.0 新增）
+        founded = basic.get("founded_year", 0)
+        if founded > 0:
+            years = 2026 - founded
+            if years >= 5:
+                qual_score += 0.03
+                factors.append(f"成立{years}年: +3%")
+            elif years >= 3:
+                qual_score += 0.02
+                factors.append(f"成立{years}年: +2%")
+
+        qual_score = min(0.30, qual_score)  # 上限 30%
+
+        # 因素4: 竞争度估算（权重 20%）— v4.0 动态化
+        title = policy.get("title", "")
+        competition_factor = 1.0
+
+        # 政策级别
+        if "国家重点" in title or "国家级" in title or "国务院" in title:
+            competition_factor *= 0.75
+            factors.append("国家级政策: 竞争度高 (-25%)")
+        elif "省级" in title or "省厅" in title:
+            competition_factor *= 0.85
+            factors.append("省级政策: 竞争度中 (-15%)")
+        elif "市级" in title or "州级" in title:
+            competition_factor *= 0.92
+            factors.append("市州级政策: 竞争度低 (-8%)")
+        else:
+            competition_factor *= 0.90
+            factors.append("政策级别: 一般竞争度 (-10%)")
+
+        # 政策热度（根据关键词判断是否为热门领域）
+        hot_keywords = ["人工智能", "芯片", "集成电路", "新能源", "生物医药",
+                       "量子", "低空经济", "储能", "氢能", "数据要素"]
+        hot_count = sum(1 for kw in hot_keywords if kw in title)
+        if hot_count >= 2:
+            competition_factor *= 0.85
+            factors.append("热门领域: 竞争度额外增加 (-15%)")
+        elif hot_count == 1:
+            competition_factor *= 0.92
+            factors.append("较热门领域: 竞争度略增 (-8%)")
+
+        # 综合概率（v4.0: 权重调整，上限提升到 95%）
+        base_probability = 0.35  # 基准 35%（降低基准，让企业资质发挥更大作用）
+        probability = (
+            base_probability * 0.25           # 基准
+            + hard_rate * 0.30                # 硬性条件
+            + score_factor * 0.25             # 匹配分数
+            + qual_score * 0.20               # 企业资质（权重提升）
+        ) * competition_factor
+
+        # 限制范围
+        probability = max(0.05, min(0.95, probability))
+
+        return round(probability, 2), factors, f"{passed_conditions}/{total_conditions}"
+
+    # ============================================================
+    # Layer 4: ROI 量化 (集成 roi_calculator.py)
+    # ============================================================
+
+    def _calculate_roi(self, policy, profile, success_probability):
+        """计算 ROI"""
+        try:
+            from roi_calculator import ROICalculator, format_roi_report
+
+            industry = profile.get("industry", {}).get("primary_sector", "通用")
+            calc = ROICalculator(industry=industry)
+            financials = calc.estimate_financials(policy, profile)
+            result = calc.calculate(financials, success_probability)
+
+            return result.roi_ratio, result.verdict, result.to_dict()
+        except Exception as e:
+            logger.warning(f"ROI 计算失败: {e}")
+            return 0.0, "ROI 计算不可用", {}
+
+    # ============================================================
+    # Layer 5: 提升路径
+    # ============================================================
+
+    def _generate_improvement_paths(self, tech, prod, mkt, cap, weights, hard_detail):
+        """根据差距分析生成提升路径"""
+        paths = []
+        dim_names = {"tech": "技术端", "prod": "生产端", "mkt": "市场端", "cap": "资本端"}
+        dim_scores = {"tech": tech, "prod": prod, "mkt": mkt, "cap": cap}
+
+        # 按差距从大到小排序（5 - 当前分）
+        gaps = sorted(dim_scores.items(), key=lambda x: 5 - x[1], reverse=True)
+
+        for dim, score in gaps:
+            if score >= 4:
+                continue  # 已经很好，不需要提升
+            gap = 5 - score
+            weight = weights.get(dim, 0.25)
+            importance = weight * 5  # 权重越大越重要
+
+            # 生成具体建议
+            suggestions = self._get_dim_suggestions(dim, score)
+
+            difficulty = "容易" if gap <= 1 else "中等" if gap <= 2 else "困难"
+            time_est = f"{gap * 2}个月" if gap <= 2 else f"{gap * 3}个月"
+
+            paths.append({
+                "dimension": dim_names[dim],
+                "current_score": f"{score}/5",
+                "gap": gap,
+                "importance": f"{importance:.1f}",
+                "difficulty": difficulty,
+                "estimated_time": time_est,
+                "suggestions": suggestions,
+            })
+
+        return paths
+
+    def _get_dim_suggestions(self, dim: str, score: int) -> list:
+        """根据维度和当前分数生成具体建议"""
+        suggestions_map = {
+            "tech": {
+                0: ["加强技术研发投入", "引进高层次技术人才", "建立产学研合作"],
+                1: ["申报科技计划项目", "申请专利/软著", "参加技术标准制定"],
+                2: ["申报高新技术企业认定", "建立研发机构", "加大研发投入占比"],
+                3: ["冲刺省级科技奖", "参与国家重点研发", "建设省级以上创新平台"],
+            },
+            "prod": {
+                0: ["建设或租赁生产基地", "取得生产许可证", "建立质量管理体系"],
+                1: ["扩大产能规模", "获取ISO认证", "建设标准化产线"],
+                2: ["申请绿色工厂/灯塔工厂", "提升自动化水平", "完善供应链"],
+                3: ["建设智能工厂", "申报产能示范项目", "拓展产能覆盖区域"],
+            },
+            "mkt": {
+                0: ["建立销售渠道", "参加行业展会", "申请产品认证"],
+                1: ["拓展区域市场", "建立品牌体系", "争取政府采购资质"],
+                2: ["进入行业目录/名录", "申报示范项目", "建立战略客户关系"],
+                3: ["争创行业标杆/单项冠军", "拓展国际市场", "建设行业生态"],
+            },
+            "cap": {
+                0: ["规范财务管理", "建立融资渠道", "申请基础性补贴"],
+                1: ["引入天使/VC投资", "申请高企税收优惠", "建立信用评级"],
+                2: ["冲刺区域股权市场挂牌", "申请产业基金", "建立投资者关系"],
+                3: ["准备北交所/科创板IPO", "引入战略投资者", "设计股权激励"],
+            },
+        }
+        dim_map = suggestions_map.get(dim, {})
+        return dim_map.get(score, dim_map.get(0, ["待补充具体建议"]))
+
+    # ============================================================
+    # Layer 6: 人工偏好过滤
+    # ============================================================
+
+    def _check_preferences(self, policy, prefs, result):
+        """检查偏好过滤条件
+
+        Returns:
+            (pass_bool, notes_list)
+        """
+        if not prefs:
+            return True, []
+
+        notes = []
+        text = f"{policy.get('title', '')} {policy.get('summary', '')}"
+
+        # 必选条件
+        must_haves = prefs.get("must_have", [])
+        for condition in must_haves:
+            if condition not in text:
+                notes.append(f"未满足必选: {condition}")
+                return False, notes
+
+        # 排除条件
+        excludes = prefs.get("exclude", [])
+        for exc in excludes:
+            if exc in text:
+                notes.append(f"命中排除条件: {exc}")
+                return False, notes
+
+        # 可选加分
+        nice_to_haves = prefs.get("nice_to_have", [])
+        nice_count = sum(1 for n in nice_to_haves if n in text)
+        if nice_count > 0:
+            notes.append(f"命中加分项: {nice_count}/{len(nice_to_haves)}")
+
+        # ROI 阈值
+        min_roi = prefs.get("min_roi_ratio", 0)
+        if min_roi > 0 and result.roi_ratio < min_roi:
+            notes.append(f"ROI {result.roi_ratio:.1f}x 低于阈值 {min_roi}x")
+            return False, notes
+
+        return True, notes
+
+    def _calculate_recommendation_from_weighted(self, weighted_score, hard_pass, pref_match):
+        """基于加权分数计算推荐等级"""
+        if not hard_pass:
+            weighted_score = min(weighted_score, 3.0)
+        if not pref_match:
+            weighted_score = min(weighted_score, 2.0)
+
+        if weighted_score >= 4.0:
+            return 5
+        elif weighted_score >= 3.0:
+            return 4
+        elif weighted_score >= 2.0:
+            return 3
+        elif weighted_score >= 1.0:
+            return 2
+        else:
+            return 1

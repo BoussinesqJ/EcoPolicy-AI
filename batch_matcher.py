@@ -12,7 +12,7 @@
   from batch_matcher import BatchMatcher
   bm = BatchMatcher(db_path, enterprises_dir, output_dir)
   report = bm.run()                    # 全量匹配
-  report = bm.run(enterprise_id="jyuh") # 指定企业
+  report = bm.run(enterprise_id="company_a") # 指定企业
   report = bm.run(min_score=9)          # 只输出 >= 3/5 的结果
 """
 
@@ -23,6 +23,8 @@ from pathlib import Path
 from typing import Optional
 
 from enterprise_matcher import EnterpriseMatcher, _hash_url
+from roi_calculator import ROICalculator, classify_policy_type, format_roi_report
+from policy_stacker import PolicyStacker, format_stacking_report
 
 logger = logging.getLogger("batch_matcher")
 
@@ -130,6 +132,23 @@ class BatchMatcher:
             "enterprises": results_by_enterprise,
             "generated_at": datetime.now().isoformat(),
         }
+
+        # P0: 政策组合叠加分析
+        for eid in target_ids:
+            edata = results_by_enterprise.get(eid, {})
+            matches = edata.get("matches", [])
+            if len(matches) >= 2:
+                stacking_input = self._prepare_stacking_input(matches, eid)
+                if stacking_input:
+                    stacker = PolicyStacker()
+                    ent_profile = edata.get("profile", {})
+                    stacking_result = stacker.analyze(stacking_input, ent_profile)
+                    edata["stacking"] = stacking_result
+                    logger.info(
+                        f"Stacking analysis for {eid}: "
+                        f"{len(stacking_result.get('bundles', []))} bundles, "
+                        f"ceiling {stacking_result['ceiling'].feasible_max:.0f}wan"
+                    )
 
         report_path = self._generate_report(report_data)
         report_data["report_path"] = str(report_path)
@@ -281,6 +300,12 @@ class BatchMatcher:
                     lines.append(f"| {m.policy_title[:40]} | {m.score_total}/20 | {kws} |")
                 lines.append("")
 
+            # P0: 政策组合叠加分析
+            stacking = edata.get("stacking")
+            if stacking and stacking.get("bundles"):
+                lines.extend(format_stacking_report(stacking).split("\n"))
+                lines.append("")
+
             lines.append("---")
             lines.append("")
 
@@ -301,6 +326,47 @@ class BatchMatcher:
 
         logger.info(f"Report generated: {report_path}")
         return report_path
+
+    def _prepare_stacking_input(self, matches: list, enterprise_id: str) -> list:
+        """将匹配结果转换为 PolicyStacker 的输入格式"""
+        stacker_input = []
+        for m in matches:
+            if m.recommendation_score < 3:
+                continue
+
+            # 用 ROI 计算器获取收益/成本
+            try:
+                industry = ""
+                ent = self.matcher.enterprises.get(enterprise_id, {})
+                if ent:
+                    industry = ent.get("profile", {}).get("industry", {}).get("primary_sector", "通用")
+
+                calc = ROICalculator(industry=industry)
+                policy_dict = {
+                    "title": m.policy_title,
+                    "summary": m.policy_summary,
+                    "url": m.policy_url,
+                    "source": m.policy_source,
+                }
+                profile = ent.get("profile", {}) if ent else {}
+                financials = calc.estimate_financials(policy_dict, profile)
+                roi_result = calc.calculate(financials, m.success_probability)
+
+                policy_type = classify_policy_type(m.policy_title, m.policy_summary)
+
+                stacker_input.append({
+                    "policy": policy_dict,
+                    "roi_ratio": roi_result.roi_ratio,
+                    "benefit": roi_result.risk_adjusted_benefit,
+                    "cost": roi_result.total_cost,
+                    "policy_type": policy_type,
+                    "recommendation": m.recommendation_score,
+                })
+            except Exception as e:
+                logger.warning(f"Failed to compute ROI for stacking: {e}")
+                continue
+
+        return stacker_input
 
     def close(self):
         """关闭数据库连接"""

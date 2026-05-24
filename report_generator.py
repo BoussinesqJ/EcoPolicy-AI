@@ -67,7 +67,7 @@ class ReportGenerator:
         return str(filepath)
 
     def _render_brief(self, m) -> str:
-        """渲染匹配简报 Markdown"""
+        """渲染匹配简报 Markdown (v4.0 六层评分)"""
         now = datetime.now().strftime("%Y-%m-%d")
 
         # 硬性条件明细
@@ -84,19 +84,62 @@ class ReportGenerator:
         opp_text = "\n".join(f"- {o}" for o in m.opportunities) if m.opportunities else "- 暂无明确机会识别"
         risk_text = "\n".join(f"- {r}" for r in m.risks) if m.risks else "- 暂无明显风险"
 
+        # 雷达图（ASCII）
+        radar = self._render_radar(m.score_tech, m.score_prod, m.score_mkt, m.score_cap)
+
+        # 权重信息
+        w = m.weights_used
+        weight_text = f"Tech {w.get('tech', 0):.0%} / Prod {w.get('prod', 0):.0%} / Mkt {w.get('mkt', 0):.0%} / Cap {w.get('cap', 0):.0%}"
+
+        # 成功概率
+        prob_bar = self._render_probability_bar(m.success_probability)
+        prob_factors = "\n".join(f"  - {f}" for f in m.probability_factors) if m.probability_factors else "  - 基于默认模型估算"
+
+        # ROI
+        roi_section = ""
+        if m.roi_detail and m.roi_ratio > 0:
+            roi_section = f"""
+| ROI 指标 | 结果 |
+|:---------|:-----|
+| ROI 倍数 | **{m.roi_ratio:.1f}x** |
+| 风险等级 | {m.roi_detail.get('risk_level', '-')} |
+| 回本周期 | {m.roi_detail.get('payback_months', '-')}个月 |
+
+> {m.roi_verdict}
+"""
+
+        # 提升路径
+        paths_text = ""
+        if m.improvement_paths:
+            rows = []
+            for p in m.improvement_paths[:3]:
+                rows.append(f"| {p['dimension']} | {p['current_score']} -> +{p['gap']} | {p['difficulty']} | {p['estimated_time']} |")
+                for s in p.get("suggestions", [])[:2]:
+                    rows.append(f"  - {p['dimension']}: {s}")
+            paths_text = "\n".join(rows)
+
+        # 偏好备注
+        pref_text = ""
+        if m.preference_notes:
+            pref_text = "\n".join(f"- {n}" for n in m.preference_notes)
+
         return f"""---
 title: "政策匹配简报 - {m.enterprise_name} x {m.policy_title[:30]}"
 date: "{now}"
 author: "EcoPolicy Agent"
 status: "自动生成"
-type: "匹配简报"
+type: "匹配简报 (v4.0 六层评分)"
 enterprise: "{m.enterprise_id}"
 recommendation: "{m.recommendation}"
+weighted_score: "{m.weighted_score}"
+success_probability: "{m.success_probability}"
+roi_ratio: "{m.roi_ratio}"
 ---
 
 # 政策匹配简报
 
-> **一句话判断**: {m.enterprise_name} 与「{m.policy_title[:40]}」匹配度 {m.recommendation}。
+> **一句话判断**: {m.enterprise_name} 与「{m.policy_title[:40]}」匹配度 **{m.recommendation}**。
+> 加权评分 **{m.weighted_score}/5** | 成功概率 **{m.success_probability:.0%}** | ROI **{m.roi_ratio:.1f}x**
 
 ---
 
@@ -113,39 +156,54 @@ recommendation: "{m.recommendation}"
 
 ---
 
-## 二、企业画像概要
-
-| 项目 | 内容 |
-|:------|:------|
-| **企业名称** | {m.enterprise_name} |
-| **企业 ID** | {m.enterprise_id} |
-| **所属行业** | {m.enterprise_id} |
-
----
-
-## 三、硬性条件比对
+## 二、硬性条件比对
 
 | 条件项 | 说明 | 判定 |
 |:------|:------|:--:|
 {hard_table}
 
 > {"全部硬性条件通过" if m.hard_conditions_pass else "部分硬性条件未通过，需人工确认是否影响申报"}
+> 硬性条件通过率: {m.hard_pass_rate}
 
 ---
 
-## 四、PolicyMatch Matrix 四维评分
+## 三、六层评分体系
 
-| 维度 | 评分 | 分析 |
-|:------|:--:|:------|
-| **Tech (技术端)** | {m.score_tech}/5 | {"高度相关" if m.score_tech >= 4 else "部分相关" if m.score_tech >= 2 else "关联度低"} |
-| **Prod (生产端)** | {m.score_prod}/5 | {"高度相关" if m.score_prod >= 4 else "部分相关" if m.score_prod >= 2 else "关联度低"} |
-| **Mkt (市场端)** | {m.score_mkt}/5 | {"高度相关" if m.score_mkt >= 4 else "部分相关" if m.score_mkt >= 2 else "关联度低"} |
-| **Cap (资本端)** | {m.score_cap}/5 | {"高度相关" if m.score_cap >= 4 else "部分相关" if m.score_cap >= 2 else "关联度低"} |
-| **总计** | **{m.score_total}/20** | **{m.recommendation}** |
+### Layer 1: 维度评分 + 雷达图
+
+{radar}
+
+| 维度 | 评分 | 权重 | 加权贡献 | 分析 |
+|:------|:--:|:--:|:--:|:------|
+| **Tech (技术端)** | {m.score_tech}/5 | {w.get('tech', 0):.0%} | {m.score_tech * w.get('tech', 0):.2f} | {"高度相关" if m.score_tech >= 4 else "部分相关" if m.score_tech >= 2 else "关联度低"} |
+| **Prod (生产端)** | {m.score_prod}/5 | {w.get('prod', 0):.0%} | {m.score_prod * w.get('prod', 0):.2f} | {"高度相关" if m.score_prod >= 4 else "部分相关" if m.score_prod >= 2 else "关联度低"} |
+| **Mkt (市场端)** | {m.score_mkt}/5 | {w.get('mkt', 0):.0%} | {m.score_mkt * w.get('mkt', 0):.2f} | {"高度相关" if m.score_mkt >= 4 else "部分相关" if m.score_mkt >= 2 else "关联度低"} |
+| **Cap (资本端)** | {m.score_cap}/5 | {w.get('cap', 0):.0%} | {m.score_cap * w.get('cap', 0):.2f} | {"高度相关" if m.score_cap >= 4 else "部分相关" if m.score_cap >= 2 else "关联度低"} |
+| **加权总分** | | | **{m.weighted_score}/5** | **{m.recommendation}** |
+
+> 权重体系: {weight_text}
+
+### Layer 2: 成功概率
+
+{prob_bar}
+
+**概率因素**:
+{prob_factors}
+
+### Layer 3: ROI 量化评估
+{roi_section}
+### Layer 4: 提升路径
+
+| 维度 | 当前 -> 差距 | 难度 | 预估时间 |
+|:------|:------|:--:|:------|
+{paths_text if paths_text else "| - | 各维度均已达标 | - | - |"}
+
+### Layer 5: 偏好匹配
+{f"**偏好备注**: {pref_text}" if pref_text else "> 无自定义偏好配置（使用默认评分体系）"}
 
 ---
 
-## 五、机会与风险
+## 四、机会与风险
 
 ### 机会
 
@@ -157,51 +215,51 @@ recommendation: "{m.recommendation}"
 
 ---
 
-## 六、匹配关键词
+## 五、匹配关键词
 
 {kw_text}
 
 ---
 
-## 七、建议下一步
+## 六、建议下一步
 
 {"### 生成深度分析报告" if m.recommendation_score >= 3 else "### 暂不推荐深入分析"}
 
 {f"该政策与 {m.enterprise_name} 匹配度达到 **{m.recommendation}**，建议执行深度分析：" if m.recommendation_score >= 3 else f"该政策匹配度较低（{m.recommendation}），暂不建议投入分析资源。"}
 
-1. 运行 `python -m agent.agent deep {m.policy_url_hash}` 生成深度分析请求
-2. 将请求文件发送给 AI 助手，执行六步标准分析工作流
+1. 读取 `CLAUDE.md` 获取六步标准分析工作流
+2. 基于企业画像 (`enterprises/{m.enterprise_id}/profile.yaml`) 执行深度分析
 3. 根据分析结果决定是否申报
 
 ---
 
----
-
-## 八、反馈
-
-> 审阅本简报后，请提交您的反馈，帮助系统持续优化。
-
-**采纳/拒绝**:
-```
-python -m agent.agent feedback --policy-hash {m.policy_url_hash} --enterprise {m.enterprise_id} --action accepted
-python -m agent.agent feedback --policy-hash {m.policy_url_hash} --enterprise {m.enterprise_id} --action rejected --detail "原因"
-```
-
-**更新申报结果**（采纳后使用）:
-```
-python -m agent.agent outcome --policy-hash {m.policy_url_hash} --enterprise {m.enterprise_id} --result submitted
-python -m agent.agent outcome --policy-hash {m.policy_url_hash} --enterprise {m.enterprise_id} --result approved
-```
-
-**事后评分**:
-```
-python -m agent.agent score --policy-hash {m.policy_url_hash} --enterprise {m.enterprise_id} --accuracy 4 --usefulness 5 --notes "备注"
-```
-
----
-
-*本简报由 EcoPolicy Agent 自动生成。深度分析需人工触发。*
+*本简报由 EcoPolicy Agent v4.0 (六层评分体系) 自动生成。*
 """
+
+    def _render_radar(self, tech, prod, mkt, cap) -> str:
+        """渲染 ASCII 雷达图"""
+        def bar(score, max_score=5):
+            filled = int(score / max_score * 10)
+            return "O" * filled + "." * (10 - filled)
+
+        return f"""```text
+    Tech (技术端): [{bar(tech)}] {tech}/5
+    Prod (生产端): [{bar(prod)}] {prod}/5
+    Mkt (市场端): [{bar(mkt)}] {mkt}/5
+    Cap (资本端): [{bar(cap)}] {cap}/5
+```"""
+
+    def _render_probability_bar(self, prob) -> str:
+        """渲染成功概率条"""
+        if prob >= 0.7:
+            level = "高"
+        elif prob >= 0.4:
+            level = "中"
+        else:
+            level = "低"
+        filled = int(prob * 20)
+        bar = "X" * filled + "." * (20 - filled)
+        return f"```text\n    成功概率: [{bar}] {prob:.0%} ({level})\n```"
 
     def _render_deep_analysis_request(self, m, brief_path: str = None) -> str:
         """渲染深度分析请求"""

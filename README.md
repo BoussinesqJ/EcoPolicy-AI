@@ -91,6 +91,7 @@ EcoPolicy-AI/
 ├── report_generator.py              报告生成器（简报 + 深度分析模板）
 ├── batch_matcher.py                 批量匹配引擎（多企业 x 全量政策排行榜）
 ├── policy_tracker.py                政策历史版本追踪（变更检测 + 对比报告）
+├── policy_stacker.py                政策组合叠加分析（互补/互斥检测 + 组合优化 + 收入天花板）
 ├── examples/                        示例产出（脱敏）
 ├── security_review.py               安全审查脚本
 ├── README.md / ROADMAP.md / project.md
@@ -236,6 +237,15 @@ MIT License
 - [x] 申报草稿自动生成（模板化框架 + 脱敏示例）
 - [x] 批量匹配（batch_matcher.py：多企业 x 全量政策排行榜 + 汇总报告）
 - [x] 政策历史版本对比（policy_tracker.py：快照追踪 + 变更检测 + 对比报告）
+- [x] 政策组合叠加分析（policy_stacker.py：互补/互斥检测 + 3 策略组合优化 + 收入天花板）
+- [x] 六层评价体系（v4.0）
+  - [x] 维度评分 + ASCII 雷达图 + 可调权重
+  - [x] 成功概率动态估算（8项资质 + 政策级别竞争度 + 行业热度修正）
+  - [x] ROI 量化评估（按政策类型真实约束计算，64 行业基准）
+  - [x] 提升路径自动生成 + 人工偏好过滤
+  - [x] 快速淘汰机制（四维全零跳过深层分析）
+  - [x] 不推荐原因自动生成
+  - [x] 煤炭能源行业关键词扩展（+10 生态修复）
 
 ### Phase 4：界面与 API [计划中]
 

@@ -1,0 +1,72 @@
+# ============================================================
+# 企业偏好配置模板
+# ============================================================
+#
+# 用途：覆盖 AI 默认的评分权重和过滤条件，让分析结果更贴合企业实际需求
+# 使用：复制到 enterprises/{企业简称}/preferences.yaml，按需修改
+#
+# 说明：
+#   - weights: 维度权重（总和应为 1.0，否则自动归一化）
+#   - must_have: 必选条件（不满足则排除该政策）
+#   - nice_to_have: 加分项（有则优先排序）
+#   - risk_tolerance: 风险偏好（conservative / moderate / aggressive）
+#   - time_horizon: 时间约束（6months / 12months / 24months / any）
+#   - exclude: 排除条件（不想看到的政策类型）
+#   - priority_dimensions: 重点关注维度（报告中会额外展开分析）
+# ============================================================
+
+enterprise: "企业简称"
+
+# 1. 维度权重（覆盖 AI 默认值）
+# 默认值：tech=0.25, prod=0.25, mkt=0.25, cap=0.25
+# 行业默认值可参考 policy_matrix_generator.md
+weights:
+  tech: 0.25    # 技术端
+  prod: 0.25    # 生产端
+  mkt: 0.25     # 市场端
+  cap: 0.25     # 资本端
+
+# 2. 必选条件（不满足直接排除）
+# 可选值：行业关键词、政策类型、地域要求等
+must_have: []
+#  must_have:
+#    - "税收优惠"
+#    - "湖北省内"
+
+# 3. 可选加分（有则优先排序）
+nice_to_have: []
+#  nice_to_have:
+#    - "种业专项"
+#    - "南繁相关"
+#    - "高企认定"
+
+# 4. 风险偏好
+# conservative: 保守型，优先低风险高确定性政策
+# moderate: 平衡型，兼顾收益和风险
+# aggressive: 进取型，愿意接受高风险高回报政策
+risk_tolerance: "moderate"
+
+# 5. 时间约束
+# 6months: 半年内必须落地
+# 12months: 一年内
+# 24months: 两年内
+# any: 无时间约束
+time_horizon: "any"
+
+# 6. 排除条件（不想看到的政策类型）
+exclude: []
+#  exclude:
+#    - "海外业务相关"
+#    - "军工相关"
+
+# 7. 重点关注维度（报告中额外展开）
+priority_dimensions: []
+#  priority_dimensions:
+#    - "cap"   # 资本端优先分析
+#    - "mkt"   # 市场端优先分析
+
+# 8. ROI 阈值（低于此 ROI 的政策自动降级）
+min_roi_ratio: 1.0
+
+# 9. 最大同时跟进数（排行榜中只显示前 N 条）
+max_simultaneous: 5
