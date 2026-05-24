@@ -1,59 +1,59 @@
-# EcoPolicy-AI Roadmap
+# EcoPolicy-AI 路线图
 
-## Phase 1: Foundation [DONE]
+## Phase 1：基础建设 [已完成]
 
-- [x] Policy monitoring tool (fetcher + parsers + database)
-- [x] 37 national data sources (State Council API x 32 + verified HTML x 5)
-- [x] 31 provincial region configurations (all mainland provinces/municipalities/autonomous regions)
-- [x] Industry classification system (5 categories, 43 sub-industries)
-- [x] Agent orchestration system (scanner + matcher + report + notifier)
-- [x] Enterprise profile template (10 dimensions + business model for asset-light)
-- [x] 7 industry-specific analysis frameworks (40+ keywords each)
-- [x] Standard analysis workflow (6 steps)
-- [x] Output standards (5-point scoring, P0/P1/P2 priority, formatting)
-- [x] 3 demo case studies
-- [x] CLI English localization (all terminal output in English)
+- [x] 政策监控工具（抓取器 + 解析器 + 数据库）
+- [x] 37 个国家数据源（国务院 API x 32 + 已验证 HTML x 5）
+- [x] 31 个省级区域配置（全部大陆省级行政区/直辖市/自治区）
+- [x] 产业分类体系（5 大类 / 43 个子行业）
+- [x] Agent 编排系统（扫描器 + 匹配器 + 简报生成器 + 通知器）
+- [x] 企业画像模板（10 大维度 + 轻资产商业模式字段）
+- [x] 7 个行业专属分析框架（每个 40+ 关键词）
+- [x] 标准分析工作流（6 步）
+- [x] 输出规范（5/5 分制评分、P0/P1/P2 优先级、排版标准）
+- [x] 3 份脱敏示例案例
+- [x] CLI 英文化（所有终端输出改为英文，避免 GBK 编码乱码）
 
-## Phase 2: Validation & Optimization [DONE]
+## Phase 2：验证与优化 [已完成]
 
-- [x] Multi-industry case validation (5 industries: manufacturing, digital economy, new energy, biopharma, new materials)
-- [x] GitHub repository setup and initial push
-- [x] Expanded policy sources (+12: NMPA/NHSA/NDA/PBOC/CSRC/CNIPA/SASAC/MOHRSS/SAMR/MOE/MCT/MCA)
-- [x] Deep industry analysis (7 dimension-specific keyword systems, 40+ keywords each)
-- [x] Asset-light industry adaptation (business_model module, digital asset dimensions)
-- [x] Feedback mechanism (accept/reject/outcome tracking + accuracy/usefulness scoring)
-- [x] Scheduled task integration (Python scheduler + Windows Task Scheduler + Linux cron)
-- [x] Security review automation (`security_review.py` for pre-push checks)
-- [ ] Enterprise multi-profile isolation test (2nd enterprise)
+- [x] 多行业案例验证（5 个行业：制造业、数字经济、新能源、生物医药、新材料）
+- [x] GitHub 仓库搭建与首次推送
+- [x] 扩展政策数据源（+12 个：药监局/医保局/数据局/央行/证监会/知识产权局/国资委/人社部/市场监管总局/教育部/文旅部/民政部）
+- [x] 行业深度分析（7 个行业维度专属关键词体系，每个 40+ 关键词）
+- [x] 轻资产行业适配（business_model 模块 + 数字资产维度）
+- [x] 反馈机制（采纳/拒绝/结果追踪 + 准确度/实用性评分）
+- [x] 定时调度集成（Python scheduler + Windows Task Scheduler + Linux cron）
+- [x] 安全审查自动化（`security_review.py` 推送前自动审查）
+- [ ] 多企业档案隔离验证（第二家企业建档）
 
-## Phase 3: Agent Enhancement [PLANNED]
+## Phase 3：Agent 增强 [计划中]
 
-- [ ] Multi-turn conversation support for deep analysis
-- [ ] Application draft generation (feasibility report outlines)
-- [ ] Batch matching (one enterprise against multiple policies, ranked by priority)
-- [ ] Historical policy trend analysis and change tracking
-- [ ] Cross-region policy comparison
+- [ ] 多轮对话支持，实现追问式深度分析
+- [ ] 申报草稿自动生成（可研报告大纲等）
+- [ ] 批量匹配（一个企业同时匹配多条政策，按优先级排序）
+- [ ] 政策历史版本对比与变化追踪
+- [ ] 跨区域政策对比分析
 
-## Phase 4: Interface & API [PLANNED]
+## Phase 4：界面与 API [计划中]
 
-- [ ] Web dashboard (Flask/FastAPI)
-- [ ] REST API for external integration
-- [ ] Email / WeChat notification integration
-- [ ] PDF report generation (CJK-compatible)
+- [ ] Web 管理界面（Flask/FastAPI）
+- [ ] REST API 供第三方系统接入
+- [ ] 邮件 / 微信通知集成
+- [ ] PDF 报告生成（兼容中文 CJK）
 
-## Phase 5: Community & Scale [PLANNED]
+## Phase 5：社区与规模化 [计划中]
 
-- [ ] More industry analysis templates (healthcare, logistics, finance)
-- [ ] More provincial data sources (community-contributed)
-- [ ] Multi-language support (English policy summary)
-- [ ] Plugin architecture for custom analyzers
+- [ ] 更多行业分析模板（医疗健康、物流、金融等）
+- [ ] 更多省级数据源（社区贡献）
+- [ ] 多语言支持（英文政策摘要）
+- [ ] 插件化架构，支持自定义分析器
 
 ---
 
-## Contributing
+## 参与贡献
 
-See [README.md](README.md) for setup instructions.
+请参阅 [README.md](README.md) 获取搭建指南。
 
-## License
+## 许可证
 
 MIT
