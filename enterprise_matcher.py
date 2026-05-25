@@ -18,9 +18,18 @@ from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
+import sys
 import yaml
 
-from matcher import _fuzzy_match
+# Ensure policy_monitor modules are importable
+_pm_dir = str(Path(__file__).parent / "policy_monitor")
+if _pm_dir not in sys.path:
+    sys.path.insert(0, _pm_dir)
+
+try:
+    from matcher import _fuzzy_match
+except ImportError:
+    _fuzzy_match = None  # Graceful degradation if matcher not available
 
 logger = logging.getLogger("agent.matcher")
 

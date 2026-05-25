@@ -2,13 +2,17 @@
 """
 政策监控系统 - 入口脚本
 用法：
-  python main.py run                         运行一次抓取（国家级）
-  python main.py run --region 湖北            抓取国家级 + 湖北省
-  python main.py run --industry strategic_emerging   按产业分类抓取/筛选
-  python main.py stats                       显示数据库统计
-  python main.py export                      导出最新数据
-  python main.py list-regions                列出已配置省市
-  python main.py list-industries             列出产业分类
+  python main.py scan --url "https://..."     Analyze a single policy URL
+  python main.py scan --file policy.pdf       Analyze a local policy file
+  python main.py match --enterprise example   Match policies against an enterprise
+  python main.py run                          Batch crawl all sources
+  python main.py run --source "国务院"        Crawl a single named source
+  python main.py run --limit 10               Crawl first 10 sources only
+  python main.py run --region 湖北            Crawl national + Hubei
+  python main.py stats                        Show database statistics
+  python main.py export                       Export latest data
+  python main.py list-regions                 List configured regions
+  python main.py list-industries              List industry classification
 """
 
 import sys
@@ -211,6 +215,217 @@ def run_fetch(config: dict, region: str = None, industry: str = None):
     return all_new_policies
 
 
+def scan_url(config: dict, url: str):
+    """按需分析：抓取单个政策 URL 并生成摘要"""
+    from parsers import parse_html, parse_api
+
+    fetcher = SafeFetcher(config)
+    kw_matcher = KeywordMatcher(config)
+    ind_matcher = IndustryMatcher(str(INDUSTRIES_PATH))
+    db = PolicyDatabase(str(DB_PATH), str(DATA_DIR))
+
+    logger.info(f"Fetching: {url}")
+
+    # 判断是 API 还是 HTML
+    source_type = "api" if "gov.cn/search-gov" in url else "html"
+    html = fetcher.fetch(url, source_type=source_type)
+
+    if not html:
+        logger.error("Failed to fetch URL")
+        fetcher.close()
+        return []
+
+    if source_type == "api":
+        policies = parse_api(url, html, "scan-url")
+    else:
+        policies = parse_html(url, html, "scan-url", {})
+
+    if not policies:
+        logger.warning("No policies found in URL")
+        fetcher.close()
+        return []
+
+    # 匹配关键词
+    for p in policies:
+        result = combined_match(
+            p["title"], p.get("summary", ""),
+            kw_matcher, ind_matcher, None,
+            full_text=p.get("summary", ""),
+        )
+        p["keywords_matched"] = result["keywords_matched"]
+        p["score"] = result["total_score"]
+        p["priority"] = result["final_priority"]
+        if result["industry_matched"]:
+            top = result["industry_matched"][0]
+            p["industry"] = f"{top['category']} > {top['name']}"
+            p["industry_keywords"] = top["keywords"]
+
+    # 存入数据库
+    new_count = db.insert_batch(policies)
+
+    # 输出结果
+    print(f"\n{'='*60}")
+    print(f"  Scan Result: {url}")
+    print(f"{'='*60}")
+    print(f"  Found: {len(policies)} policies")
+    print(f"  New:   {new_count}")
+    print(f"  Matching policies (score > 0):")
+    relevant = [p for p in policies if p.get("score", 0) > 0]
+    if relevant:
+        for p in relevant:
+            print(f"    [{p['priority']}] {p['title']} (score={p['score']})")
+            if p.get("industry"):
+                print(f"         Industry: {p['industry']}")
+    else:
+        print("    No matching policies found")
+    print(f"{'='*60}\n")
+
+    fetcher.close()
+    db.close()
+    return policies
+
+
+def scan_file(config: dict, file_path: str):
+    """按需分析：解析本地政策文件并生成摘要"""
+    import re
+
+    path = Path(file_path)
+    if not path.exists():
+        logger.error(f"File not found: {file_path}")
+        return []
+
+    text = path.read_text(encoding="utf-8", errors="ignore")
+
+    kw_matcher = KeywordMatcher(config)
+    ind_matcher = IndustryMatcher(str(INDUSTRIES_PATH))
+    db = PolicyDatabase(str(DB_PATH), str(DATA_DIR))
+
+    # 简单解析：按段落拆分，提取标题
+    lines = text.strip().split("\n")
+    title = lines[0].strip() if lines else path.stem
+    summary = "\n".join(lines[1:100]) if len(lines) > 1 else ""
+
+    policies = [{
+        "title": title[:200],
+        "url": f"file://{path.absolute()}",
+        "date": "",
+        "source": f"file:{path.name}",
+        "summary": summary[:2000],
+    }]
+
+    # 匹配关键词
+    for p in policies:
+        result = combined_match(
+            p["title"], p.get("summary", ""),
+            kw_matcher, ind_matcher, None,
+            full_text=p.get("summary", ""),
+        )
+        p["keywords_matched"] = result["keywords_matched"]
+        p["score"] = result["total_score"]
+        p["priority"] = result["final_priority"]
+        if result["industry_matched"]:
+            top = result["industry_matched"][0]
+            p["industry"] = f"{top['category']} > {top['name']}"
+            p["industry_keywords"] = top["keywords"]
+
+    new_count = db.insert_batch(policies)
+
+    # 输出结果
+    print(f"\n{'='*60}")
+    print(f"  File Scan: {path.name}")
+    print(f"{'='*60}")
+    print(f"  Title:    {title[:100]}")
+    print(f"  Keywords matched:")
+    relevant = [p for p in policies if p.get("score", 0) > 0]
+    if relevant:
+        for p in relevant:
+            print(f"    [{p['priority']}] Score: {p['score']}")
+            if p.get("keywords_matched"):
+                print(f"         Keywords: {', '.join(p['keywords_matched'][:10])}")
+            if p.get("industry"):
+                print(f"         Industry: {p['industry']}")
+    else:
+        print("    No matching policies found")
+    print(f"{'='*60}\n")
+
+    db.close()
+    return policies
+
+
+def match_enterprise(config: dict, enterprise_id: str):
+    """匹配企业画像与政策数据库"""
+    # 尝试加载企业画像
+    enterprises_dir = BASE_DIR / "enterprises"
+    profile_path = enterprises_dir / enterprise_id / "profile.yaml"
+    if not profile_path.exists():
+        logger.error(f"Enterprise not found: {enterprise_id}")
+        print(f"\n  Available enterprises:")
+        if enterprises_dir.exists():
+            for d in enterprises_dir.iterdir():
+                if d.is_dir() and (d / "profile.yaml").exists():
+                    print(f"    - {d.name}")
+        return
+
+    with open(profile_path, "r", encoding="utf-8") as f:
+        profile = yaml.safe_load(f)
+
+    # 加载偏好
+    prefs_path = enterprises_dir / enterprise_id / "preferences.yaml"
+    preferences = None
+    if prefs_path.exists():
+        with open(prefs_path, "r", encoding="utf-8") as f:
+            preferences = yaml.safe_load(f)
+
+    enterprise = {"id": enterprise_id, "profile": profile}
+    if preferences:
+        enterprise["preferences"] = preferences
+
+    # 加载数据库政策
+    db = PolicyDatabase(str(DB_PATH), str(DATA_DIR))
+    stats = db.stats()
+
+    if stats["total"] == 0:
+        logger.warning("Database is empty. Run 'python main.py run' first.")
+        db.close()
+        return
+
+    print(f"\n{'='*60}")
+    print(f"  Match: {profile.get('company_name', enterprise_id)}")
+    print(f"  DB: {stats['total']} policies ({stats['P0']} P0, {stats['P1']} P1, {stats['P2']} P2)")
+    print(f"{'='*60}")
+
+    # 简单匹配：遍历数据库所有政策
+    try:
+        from enterprise_matcher import EnterpriseMatcher
+        matcher = EnterpriseMatcher(str(enterprises_dir))
+        policies = db.get_latest(limit=500)
+        results = matcher.match_policies(policies, enterprise_id=enterprise_id)
+        if results:
+            for r in results[:10]:
+                print(f"  [{r.recommendation}] {r.policy_title[:60]} (score={r.score_total})")
+        else:
+            print("  No matching policies found")
+    except ImportError:
+        logger.warning("enterprise_matcher.py not found, using keyword matching only")
+        # Fallback: use keyword matcher
+        kw_matcher = KeywordMatcher(config)
+        all_policies = db.get_all()
+        matched = []
+        for p in all_policies:
+            result = kw_matcher.match(p["title"], p.get("summary", ""))
+            if result["score"] > 0:
+                matched.append((p, result))
+        matched.sort(key=lambda x: x[1]["score"], reverse=True)
+        if matched:
+            for p, r in matched[:10]:
+                print(f"  [{r['priority']}] {p['title'][:60]} (score={r['score']})")
+        else:
+            print("  No matching policies found")
+
+    print(f"{'='*60}\n")
+    db.close()
+
+
 def show_stats(config: dict):
     db = PolicyDatabase(str(DB_PATH), str(DATA_DIR))
     stats = db.stats()
@@ -295,37 +510,73 @@ def list_industries():
     print(f"{'='*60}\n")
 
 
+def run_fetch_limit(config: dict, region: str = None, industry: str = None,
+                     limit: int = None, source: str = None):
+    """Wrapper around run_fetch with limit and source filters"""
+    if limit or source:
+        # Filter sources before fetching
+        sources = config.get("sources", [])
+        enabled = [s for s in sources if s.get("enabled", True)]
+
+        if source:
+            enabled = [s for s in enabled if source.lower() in s.get("name", "").lower()]
+            logger.info(f"Filtered to {len(enabled)} source(s) matching '{source}'")
+
+        if limit:
+            enabled = enabled[:limit]
+            logger.info(f"Limited to {len(enabled)} source(s)")
+
+        # Temporarily override config
+        modified_config = dict(config)
+        modified_config["sources"] = enabled
+        run_fetch(modified_config, region=region, industry=industry)
+    else:
+        run_fetch(config, region=region, industry=industry)
+
+
 def main():
     parser = argparse.ArgumentParser(
-        description="Policy Monitor - Crawl national/provincial policy feeds with industry classification matching",
+        description="Policy Monitor - Policy analysis and monitoring system",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  python main.py run                                      National sources only
-  python main.py run --region Hubei                       National + Hubei province
-  python main.py run --industry strategic_emerging        Strategic emerging industries
-  python main.py run --region Enshi --industry three_industries  Hubei Enshi + three industries
-  python main.py stats                                    Show database statistics
-  python main.py export                                   Export latest data
-  python main.py list-regions                             List all configured regions
-  python main.py list-industries                          List industry classification
+  # On-demand analysis (recommended)
+  python main.py scan --url "https://www.gov.cn/..."
+  python main.py scan --file policy.pdf
+  python main.py match --enterprise example
+
+  # Batch crawl
+  python main.py run                                       All sources
+  python main.py run --source "国务院"                     Single source
+  python main.py run --limit 10                            First 10 sources
+  python main.py run --region Hubei                        National + Hubei
+  python main.py run --industry strategic_emerging         Filter by industry
+
+  # Utilities
+  python main.py stats                                     Database statistics
+  python main.py export                                    Export data
+  python main.py list-regions                              List regions
+  python main.py list-industries                           List industries
         """,
     )
 
     subparsers = parser.add_subparsers(dest="command", help="Command")
 
+    # scan subcommand
+    scan_parser = subparsers.add_parser("scan", help="Scan a single policy URL or file")
+    scan_parser.add_argument("--url", type=str, help="Policy URL to scan")
+    scan_parser.add_argument("--file", type=str, help="Local policy file path")
+
+    # match subcommand
+    match_parser = subparsers.add_parser("match", help="Match policies against an enterprise")
+    match_parser.add_argument("--enterprise", "-e", type=str, required=True, help="Enterprise ID")
+
     # run subcommand
-    run_parser = subparsers.add_parser("run", help="Run one crawl")
-    run_parser.add_argument(
-        "--region", "-r",
-        type=str, default=None,
-        help="Specify region (e.g. Hubei, Enshi, Hainan)",
-    )
-    run_parser.add_argument(
-        "--industry", "-i",
-        type=str, default=None,
-        help="Specify industry (e.g. strategic_emerging, future_industries)",
-    )
+    run_parser = subparsers.add_parser("run", help="Batch crawl policy sources")
+    run_parser.add_argument("--region", "-r", type=str, default=None, help="Region (e.g. Hubei)")
+    run_parser.add_argument("--industry", "-i", type=str, default=None, help="Industry filter")
+    run_parser.add_argument("--limit", "-l", type=int, default=None, help="Max sources to crawl")
+    run_parser.add_argument("--source", "-s", type=str, default=None, help="Source name filter (e.g. '国务院')")
 
     # stats subcommand
     subparsers.add_parser("stats", help="Show database statistics")
@@ -347,8 +598,19 @@ Examples:
 
     config = load_config()
 
-    if args.command == "run":
-        run_fetch(config, region=args.region, industry=args.industry)
+    if args.command == "scan":
+        if args.url:
+            scan_url(config, args.url)
+        elif args.file:
+            scan_file(config, args.file)
+        else:
+            print("Error: --url or --file required")
+            sys.exit(1)
+    elif args.command == "match":
+        match_enterprise(config, args.enterprise)
+    elif args.command == "run":
+        run_fetch_limit(config, region=args.region, industry=args.industry,
+                       limit=args.limit, source=args.source)
     elif args.command == "stats":
         show_stats(config)
     elif args.command == "export":

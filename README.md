@@ -9,9 +9,11 @@
 
 ## 核心功能
 
-- **政策监控**：37 个国家数据源（国务院 API x 20 + 已验证 HTML x 5）+ 31 省级区域配置
+- **政策监控**：47 个数据源（国务院 API x 42 + 已验证 HTML x 5）+ 31 省级区域配置
 - **智能匹配**：PolicyMatch Matrix 四维引擎（技术/生产/市场/资本），将政策与企业画像精准匹配
 - **AI 深度分析**：六步标准工作流，从政策解读到行动清单的完整决策支持
+- **Upload-First 策略**：支持单政策 URL/PDF 快速分析（Scan），无需全量抓取即可获得深度报告
+- **单源精准抓取**：支持指定关键词/部委源的定向扫描，提高分析时效性
 - **多行业覆盖**：5 大产业分类（战略性新兴产业/未来产业/传统制造业/基础设施/三次产业），43 个子行业
 - **7 大行业分析框架**：种业/制造业/数字经济/新能源/生物医药/新材料/煤炭能源/轻资产，每行业 40+ 专业关键词
 - **轻资产适配**：支持平台型/SaaS/服务型企业，自动切换数字资产分析维度
@@ -31,18 +33,30 @@ pip install -r requirements.txt
 ### 2. 运行政策监控
 
 ```bash
-# 全国级别（37 个数据源）
+# 全国级别（47 个数据源）
 cd policy_monitor && python main.py run
 
 # 指定省市
 python main.py run --region 湖北
-python main.py run --region beijing
+
+# 指定单一源抓取（提高时效）
+python main.py run --source "国务院-农业与种业"
 
 # 按产业分类筛选
 python main.py run --industry strategic_emerging
 ```
 
-### 3. 运行企业匹配
+### 3. 按需分析 (Upload-First)
+
+```bash
+# 分析单个政策 URL
+python main.py scan --url "https://www.gov.cn/..."
+
+# 分析本地政策文件 (PDF/Text)
+python main.py scan --file policy.pdf
+```
+
+### 4. 运行企业匹配
 
 ```bash
 python enterprise_matcher.py --enterprise enterprises/{企业简称}/profile.yaml
