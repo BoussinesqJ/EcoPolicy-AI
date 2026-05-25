@@ -111,9 +111,14 @@ def run_fetch(config: dict, region: str = None, industry: str = None):
         enabled_sources = [s for s in sources if s.get("enabled", True)]
 
     all_new_policies = []
+    failed_sources = []
+    success_count = 0
 
-    logger.info(f"开始抓取，共 {len(enabled_sources)} 个数据源" +
-                (f"，产业筛选: {target_industry}" if target_industry else ""))
+    # 每个 API 源抓取多页（默认 3 页）
+    max_pages = config.get("safety", {}).get("max_pages_per_source", 3)
+
+    logger.info(f"Starting crawl: {len(enabled_sources)} sources" +
+                (f", industry filter: {target_industry}" if target_industry else ""))
 
     for i, source in enumerate(enabled_sources):
         source_name = source["name"]
@@ -121,50 +126,69 @@ def run_fetch(config: dict, region: str = None, industry: str = None):
         source_type = source.get("type", "html")
         selectors = source.get("selectors", {})
 
-        logger.info(f"\n[{i+1}/{len(enabled_sources)}] 正在处理: {source_name} ({source_type})")
+        logger.info(f"\n[{i+1}/{len(enabled_sources)}] Processing: {source_name} ({source_type})")
 
         try:
-            # 抓取页面 (api or html)
-            if source_type == "api":
-                html = fetcher.fetch(source_url)
-                policies = parse_api(source_url, html, source_name) if html else []
-            else:
-                html = fetcher.fetch(source_url)
-                policies = parse_html(source_url, html, source_name, selectors) if html else []
+            all_policies = []
 
-            # 组合匹配：全局关键词 + 产业分类
-            for p in policies:
+            if source_type == "api":
+                # API 源：支持分页抓取多页
+                for page in range(max_pages):
+                    # 构建分页 URL（国务院 API 的 n 参数控制每页条数，p 参数控制页码）
+                    page_url = source_url
+                    if "n=20" in page_url and page > 0:
+                        page_url = page_url.replace("n=20", f"n=20&p={page}")
+                    elif "?" in page_url:
+                        page_url += f"&p={page}"
+
+                    html = fetcher.fetch(page_url, source_type="api")
+                    if not html:
+                        break
+                    page_policies = parse_api(page_url, html, source_name)
+                    if not page_policies:
+                        break
+                    all_policies.extend(page_policies)
+                    logger.info(f"  Page {page + 1}: {len(page_policies)} policies")
+            else:
+                # HTML 源：单页抓取
+                html = fetcher.fetch(source_url, source_type="html")
+                all_policies = parse_html(source_url, html, source_name, selectors) if html else []
+
+            # 组合匹配：全局关键词 + 产业分类（summary 作为全文匹配）
+            for p in all_policies:
                 result = combined_match(
                     p["title"],
                     p.get("summary", ""),
                     kw_matcher,
                     ind_matcher,
                     target_industry,
+                    full_text=p.get("summary", ""),
                 )
                 p["keywords_matched"] = result["keywords_matched"]
                 p["score"] = result["total_score"]
                 p["priority"] = result["final_priority"]
 
-                # 附加产业匹配信息
                 if result["industry_matched"]:
                     top_industry = result["industry_matched"][0]
                     p["industry"] = f"{top_industry['category']} > {top_industry['name']}"
                     p["industry_keywords"] = top_industry["keywords"]
 
             # 存入数据库
-            new_count = db.insert_batch(policies)
-            new_in_this_source = [p for p in policies if p.get("score", 0) > 0]
+            new_count = db.insert_batch(all_policies)
+            new_in_this_source = [p for p in all_policies if p.get("score", 0) > 0]
 
-            logger.info(f"  {source_name}: 抓取 {len(policies)} 条，新增 {new_count} 条，相关 {len(new_in_this_source)} 条")
+            logger.info(f"  {source_name}: fetched {len(all_policies)}, new {new_count}, relevant {len(new_in_this_source)}")
 
             all_new_policies.extend(new_in_this_source)
+            success_count += 1
 
         except Exception as e:
-            logger.error(f"  {source_name} 处理失败: {e}")
+            logger.error(f"  {source_name} FAILED: {e}")
+            failed_sources.append(source_name)
             continue
 
     # 导出数据
-    logger.info("\n导出数据...")
+    logger.info("\nExporting data...")
     db.export_all()
 
     # 生成通知
@@ -172,11 +196,14 @@ def run_fetch(config: dict, region: str = None, industry: str = None):
         alert_path = notifier.generate_daily_alert(all_new_policies)
         notifier.print_summary(all_new_policies)
     else:
-        logger.info("本次运行无相关新增政策")
+        logger.info("No new relevant policies found")
 
     # 打印统计
     stats = db.stats()
-    logger.info(f"\n数据库统计: 总计 {stats['total']} 条 | P0: {stats['P0']} | P1: {stats['P1']} | P2: {stats['P2']}")
+    logger.info(f"\nDatabase: {stats['total']} total | P0: {stats['P0']} | P1: {stats['P1']} | P2: {stats['P2']}")
+    logger.info(f"Sources: {success_count} success, {len(failed_sources)} failed")
+    if failed_sources:
+        logger.info(f"Failed: {', '.join(failed_sources)}")
 
     fetcher.close()
     db.close()

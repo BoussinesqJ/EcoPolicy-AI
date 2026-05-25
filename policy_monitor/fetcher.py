@@ -27,8 +27,11 @@ class SafeFetcher:
         safety = config.get("safety", {})
         self.min_delay = safety.get("min_delay_seconds", 30)
         self.max_delay = safety.get("max_delay_seconds", 60)
+        # API 源使用更短的延迟（搜索引擎 API，非网页爬取）
+        self.api_min_delay = safety.get("api_min_delay_seconds", 5)
+        self.api_max_delay = safety.get("api_max_delay_seconds", 10)
         self.timeout = safety.get("timeout_seconds", 15)
-        self.max_retries = safety.get("max_retries", 2)
+        self.max_retries = safety.get("max_retries", 3)  # 增加重试次数
         self.respect_robots = safety.get("respect_robots", True)
         self.user_agents = safety.get("user_agents", [
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/125.0.0.0 Safari/537.36"
@@ -86,17 +89,30 @@ class SafeFetcher:
             logger.info(f"等待 {wait_time:.1f} 秒（礼貌性延迟）...")
             time.sleep(wait_time)
 
-    def fetch(self, url: str) -> str | None:
+    def _wait_for_type(self, source_type: str = "html"):
+        """按数据源类型使用不同延迟"""
+        elapsed = time.time() - self._last_request_time
+        if source_type == "api":
+            delay = random.uniform(self.api_min_delay, self.api_max_delay)
+        else:
+            delay = random.uniform(self.min_delay, self.max_delay)
+        if elapsed < delay:
+            wait_time = delay - elapsed
+            logger.info(f"等待 {wait_time:.1f} 秒...")
+            time.sleep(wait_time)
+
+    def fetch(self, url: str, source_type: str = "html") -> str | None:
         """
         安全获取网页内容。
+        source_type: "api" 跳过 robots.txt 并使用短延迟; "html" 正常检查
         返回 HTML 文本，失败返回 None。
         """
-        # robots.txt 检查
-        if not self._check_robots(url):
+        # robots.txt 检查：API 搜索接口跳过（非爬取网页）
+        if source_type != "api" and not self._check_robots(url):
             logger.warning(f"robots.txt 禁止抓取: {url}")
             return None
 
-        self._wait()
+        self._wait_for_type(source_type)
 
         self._session.headers["User-Agent"] = self._random_ua()
 
@@ -107,12 +123,11 @@ class SafeFetcher:
                 self._last_request_time = time.time()
 
                 if resp.status_code == 200:
-                    # 自动检测编码
                     resp.encoding = resp.apparent_encoding or "utf-8"
                     return resp.text
                 elif resp.status_code == 403:
-                    logger.warning(f"403 Forbidden: {url} (可能触发反爬)")
-                    return None
+                    logger.warning(f"403 Forbidden: {url} (尝试 {attempt + 1}/{self.max_retries + 1})")
+                    # 403 不再立即放弃，进入重试循环
                 elif resp.status_code == 404:
                     logger.warning(f"404 Not Found: {url}")
                     return None
@@ -120,15 +135,15 @@ class SafeFetcher:
                     logger.warning(f"HTTP {resp.status_code}: {url}")
 
             except requests.Timeout:
-                logger.warning(f"请求超时: {url}")
+                logger.warning(f"请求超时: {url} (尝试 {attempt + 1})")
             except requests.ConnectionError:
-                logger.warning(f"连接失败: {url}")
+                logger.warning(f"连接失败: {url} (尝试 {attempt + 1})")
             except Exception as e:
                 logger.error(f"请求异常: {url} -> {e}")
 
             # 指数退避
             if attempt < self.max_retries:
-                backoff = (2 ** attempt) * 5 + random.uniform(0, 3)
+                backoff = (2 ** attempt) * 3 + random.uniform(0, 2)
                 logger.info(f"重试等待 {backoff:.1f} 秒...")
                 time.sleep(backoff)
 

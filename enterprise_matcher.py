@@ -20,6 +20,8 @@ from typing import Optional
 
 import yaml
 
+from matcher import _fuzzy_match
+
 logger = logging.getLogger("agent.matcher")
 
 
@@ -327,34 +329,66 @@ INDUSTRY_DIMENSIONS = {
                        "科技成果转化"],
         },
     },
+    # v4.0 新增：生态环保（独立维度，覆盖环保/生态/碳/水/土）
+    "生态环保": {
+        "tech": {
+            "high": ["环境监测", "污染源监控", "碳核算", "碳足迹",
+                     "环境大数据", "智慧环保", "环境遥感"],
+            "medium": ["环保设备", "污染治理技术", "清洁生产技术",
+                       "资源化利用", "循环经济"],
+        },
+        "prod": {
+            "high": ["生态修复", "污染治理", "固废处理", "污水处理",
+                     "大气治理", "土壤修复", "矿山修复"],
+            "medium": ["环保工程", "环保运营", "危废处置",
+                       "环境工程设计", "环保设施建设"],
+        },
+        "mkt": {
+            "high": ["碳交易", "碳市场", "排污权交易", "用能权",
+                     "生态产品价值", "GEP核算", "ESG"],
+            "medium": ["环保督察", "环境影响评价", "排污许可",
+                       "碳配额", "绿色认证"],
+        },
+        "cap": {
+            "high": ["环保专项", "生态补偿", "碳减排支持",
+                     "绿色债券", "ESG投资", "绿色基金"],
+            "medium": ["环保补贴", "清洁生产补贴", "循环经济资金",
+                       "生态修复资金", "水土保持补偿费"],
+        },
+    },
     # v3.0 新增：煤炭/能源/矿山/工程设计
     "煤炭能源": {
         "tech": {
             "high": ["煤矿智能化", "智慧矿山", "无人开采", "安全监控",
-                     "矿山数字孪生", "自动化采掘", "瓦斯治理"],
+                     "矿山数字孪生", "自动化采掘", "瓦斯治理",
+                     "煤矿机器人", "矿山物联网", "5G矿山"],
             "medium": ["煤矿设计", "矿井通风", "井下定位", "远程监控",
-                       "矿山信息化", "工业互联网"],
+                       "矿山信息化", "工业互联网", "矿山大数据"],
         },
         "prod": {
             "high": ["生态修复", "生态治理", "生态恢复", "矿山修复", "矿山治理",
                      "矿区治理", "塌陷区修复", "沉陷区治理",
                      "绿色矿山", "矿井水处理", "煤矸石利用"],
             "medium": ["工程设计", "工程咨询", "工程总承包", "施工图审查",
-                       "项目管理", "环境影响评价", "地质灾害治理"],
+                       "项目管理", "环境影响评价", "地质灾害治理",
+                       "煤炭洗选", "煤质检测"],
         },
         "mkt": {
             "high": ["煤矿安全生产", "煤炭清洁利用", "碳减排",
                      "资源综合利用", "矿山生态修复", "土壤修复",
-                     "水土保持", "植被恢复"],
+                     "水土保持", "植被恢复", "矿山环境治理"],
             "medium": ["煤炭交易", "煤化工", "煤电联营", "矿产资源",
-                       "采矿权", "探矿权", "地质勘查"],
+                       "采矿权", "探矿权", "地质勘查",
+                       "煤炭质量标准", "矿山安全评价"],
         },
         "cap": {
             "high": ["能源基金", "绿色发展基金", "生态修复资金",
                      "安全生产补贴", "煤炭转型升级",
-                     "矿山生态补偿", "绿色债券"],
+                     "矿山生态补偿", "绿色债券",
+                     "煤矿安全改造", "矿产资源法"],
             "medium": ["技改贴息", "设备更新贷款", "产业引导基金",
-                       "科技创新补贴", "环保专项资金"],
+                       "科技创新补贴", "环保专项资金",
+                       "矿山恢复治理基金", "土地复垦费"],
         },
     },
     # v3.0 新增：轻资产/平台型（适用于数字经济、咨询服务、SaaS等）
@@ -721,7 +755,7 @@ class EnterpriseMatcher:
         industry_sector = profile.get("industry", {}).get("primary_sector", "")
         business_model = profile.get("business_model", {}).get("model_type", "")
 
-        # v3.0 改进：支持模糊匹配 + 商业模式自动识别
+        # v4.0 改进：支持模糊匹配 + 商业模式自动识别 + 9 个行业维度
         industry_dims = {}
 
         # 先检查是否为轻资产企业（排除有实体基地/重资产的服务型企业）
@@ -740,20 +774,29 @@ class EnterpriseMatcher:
                 # 支持多关键词匹配
                 sector_keywords = [sector_key]
                 if sector_key == "制造业":
-                    sector_keywords.extend(["制造", "装备", "机械", "工厂"])
+                    sector_keywords.extend(["制造", "装备", "机械", "工厂", "工业", "生产"])
                 elif sector_key == "数字经济":
-                    sector_keywords.extend(["数字", "软件", "信息", "AI", "数据", "智能"])
+                    sector_keywords.extend(["数字", "软件", "信息", "AI", "数据", "智能",
+                                           "计算", "网络", "通信", "互联网"])
                 elif sector_key == "新能源":
-                    sector_keywords.extend(["光伏", "储能", "氢能", "风电", "碳", "清洁能源", "可再生能源"])
+                    sector_keywords.extend(["光伏", "储能", "氢能", "风电", "碳", "清洁能源",
+                                           "可再生能源", "电力", "核能", "生物质"])
                 elif sector_key == "生物医药":
-                    sector_keywords.extend(["医药", "制药", "生物", "医疗", "药"])
+                    sector_keywords.extend(["医药", "制药", "生物", "医疗", "药", "健康",
+                                           "诊断", "疫苗", "基因"])
                 elif sector_key == "新材料":
-                    sector_keywords.extend(["材料", "纤维", "合金", "复合材料"])
+                    sector_keywords.extend(["材料", "纤维", "合金", "复合材料", "陶瓷",
+                                           "稀土", "高分子", "半导体材料"])
                 elif sector_key == "种业":
-                    sector_keywords.extend(["种业", "农业", "育种", "种子", "品种", "种植", "农学", "杂交"])
+                    sector_keywords.extend(["种业", "农业", "育种", "种子", "品种", "种植",
+                                           "农学", "杂交", "粮食", "畜牧", "水产", "农机"])
                 elif sector_key == "煤炭能源":
                     sector_keywords.extend(["煤", "矿", "能源", "工程设计", "工程咨询",
-                                           "生态修复", "生态治理", "地质", "测绘"])
+                                           "生态修复", "生态治理", "地质", "测绘",
+                                           "矿山", "采掘", "石油", "天然气"])
+                elif sector_key == "生态环保":
+                    sector_keywords.extend(["环保", "生态", "环境", "污染", "碳", "水",
+                                           "大气", "固废", "土壤", "修复", "治理"])
 
                 if any(kw in industry_sector for kw in sector_keywords):
                     industry_dims = dims
@@ -776,18 +819,18 @@ class EnterpriseMatcher:
 
             dim_score = 0
             for kw in high_kws:
-                if kw in title:
+                if _fuzzy_match(kw, title):
                     dim_score += 5
                     matched_kw.append(kw)
-                elif kw in text:
+                elif _fuzzy_match(kw, text):
                     dim_score += 3
                     matched_kw.append(kw)
 
             for kw in medium_kws:
-                if kw in title:
+                if _fuzzy_match(kw, title):
                     dim_score += 3
                     matched_kw.append(kw)
-                elif kw in text:
+                elif _fuzzy_match(kw, text):
                     dim_score += 1
                     matched_kw.append(kw)
 
