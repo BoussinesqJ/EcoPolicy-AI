@@ -132,17 +132,7 @@ EcoPolicy-AI/
 2. 填入企业数据（参考 `config/company_profile_template.yaml` 维度）
 3. 放入 `enterprises/{企业简称}/` 目录
 
-### 5. 快速分析 (Upload-First)
-
-```bash
-# 分析单个政策 URL
-python main.py scan --url "https://..."
-
-# 分析本地政策文件
-python main.py scan --file policy.pdf
-```
-
-### 6. 批量政策扫描
+### 5. 批量政策扫描
 
 ```bash
 # 全国级别（37 个源）

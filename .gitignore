@@ -1,38 +1,80 @@
-# Python
+# ============================================================
+# EcoPolicy-AI .gitignore
+# ============================================================
+
+# Python bytecode
 __pycache__/
 *.py[cod]
-*.egg-info/
-dist/
-build/
+*$py.class
+
+# Virtual environments
 venv/
 .venv/
+env/
+.env/
 
-# IDE
-.vscode/
+# IDE files
 .idea/
+.vscode/
+*.swp
+*.swo
+*~
 
-# Runtime output
-output/
-policy_data/
-*.db
-*.db-journal
-memory/
-.workbuddy/
-*.log
-
-# Test files (keep in dev, exclude from release)
-test_*.py
-*_test.py
-source_test_results.*
-
-# Company-specific (private data, not for public repo)
-*.docx
-*.doc
-*.pdf
-company_profile.txt
-*_profile.yaml
-!enterprises/_template/profile.yaml
-
-# OS
+# OS generated files
 .DS_Store
 Thumbs.db
+Desktop.ini
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+*.egg
+
+# ============================================================
+# EcoPolicy-AI 运行时数据（不提交）
+# ============================================================
+
+# 政策数据库和运行时数据
+policy_data/
+*.db
+*.sqlite
+*.sqlite3
+
+# 日志文件
+*.log
+logs/
+
+# 临时文件
+*.tmp
+*.bak
+
+# ============================================================
+# 排除敏感信息（安全审查相关）
+# ============================================================
+
+# 环境变量文件
+.env
+.env.*
+!.env.example
+
+# 企业真实数据（只保留模板）
+enterprises/*/
+!enterprises/_template/
+
+# 偏好配置（用户特定）
+preferences.yaml
+
+# ============================================================
+# 允许提交的文件
+# ============================================================
+
+# 配置文件（模板）
+# config/*.yaml
+# config/*.md
+
+# 示例文件（已脱敏）
+# examples/*.md
+
+# 区域配置
+# policy_monitor/regions/*.yaml

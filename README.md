@@ -1,24 +1,55 @@
-# 经济政策分析专家系统 (EcoPolicy AI)
+# 经济政策分析专家系统 (EcoPolicy-AI)
 
-> AI Agent + 行业知识库 + 政策数据库 = 对话式专家系统。为任意企业/行业提供精准的政策匹配、机遇识别与行动建议。
+> AI Agent + Skill 双态架构 | 行业知识库 + 政策数据库 = 对话式政策分析专家系统。
+> 为任意企业/行业提供精准的政策匹配、机遇识别与行动建议。
 
 [![Python 3.12+](https://img.shields.io/badge/Python-3.12+-blue.svg)](https://python.org)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Tests](https://img.shields.io/badge/Tests-51%20passed-brightgreen.svg)]()
+
+**开发者**: [BoussinesqJ](https://github.com/BoussinesqJ)
+**最后更新**: 2026-05-26
 
 ---
 
 ## 核心功能
 
-- **政策监控**：47 个数据源（国务院 API x 42 + 已验证 HTML x 5）+ 31 省级区域配置
+- **政策监控**：47 个国家数据源（国务院 API x 32 + 部委 API x 10 + 已验证 HTML x 5）+ 31 省级区域配置
 - **智能匹配**：PolicyMatch Matrix 四维引擎（技术/生产/市场/资本），将政策与企业画像精准匹配
 - **AI 深度分析**：六步标准工作流，从政策解读到行动清单的完整决策支持
-- **Upload-First 策略**：支持单政策 URL/PDF 快速分析（Scan），无需全量抓取即可获得深度报告
-- **单源精准抓取**：支持指定关键词/部委源的定向扫描，提高分析时效性
-- **多行业覆盖**：5 大产业分类（战略性新兴产业/未来产业/传统制造业/基础设施/三次产业），43 个子行业
-- **7 大行业分析框架**：种业/制造业/数字经济/新能源/生物医药/新材料/煤炭能源/轻资产，每行业 40+ 专业关键词
-- **轻资产适配**：支持平台型/SaaS/服务型企业，自动切换数字资产分析维度
+- **多行业覆盖**：5 大产业分类，43 个子行业，7 大行业分析框架（每行业 40+ 专业关键词）
+- **双态架构**：Skill 模式（REST API + MCP）与 Agent 模式（ReAct 自主推理）双形态运行
+- **IDE 原生集成**：支持 Trae / CodeBuddy / WorkBuddy 等国产 IDE 的原生 Skill 手册
 - **区域扩展**：覆盖全国 31 个省级行政区（4 直辖市 + 22 省 + 5 自治区），三级链式抓取（国家/省/市）
 - **安全合规**：robots.txt 遵守、限速抓取、无 JS 执行，零法律风险
+
+---
+
+## 双态架构
+
+EcoPolicy-AI 同时支持两种运行形态：
+
+### 🔧 Skill 模式（被调用）
+
+作为工具被外部系统（Dify / Coze / Trae / WorkBuddy）调用：
+
+| 集成方式 | 适用场景 | 启动命令 |
+|----------|----------|----------|
+| **REST API** | Dify / Coze 等 Agent 平台 | `python policy_matcher_cli.py server` |
+| **MCP 协议** | Trae / Cursor 等 IDE | `python policy_matcher_cli.py mcp` |
+| **IDE Skill 手册** | Trae / CodeBuddy 本地开发 | 自动识别 `.trae/skills/` 目录 |
+
+### 🤖 Agent 模式（自主推理）
+
+内置 ReAct 推理引擎，自主完成政策分析全流程：
+
+```bash
+# 交互式对话
+python policy_matcher_cli.py chat -e jyuh
+
+# 自动驾驶扫描（无需人工干预）
+python policy_matcher_cli.py agent-scan -e jyuh -d 30
+```
 
 ---
 
@@ -30,7 +61,7 @@
 pip install -r requirements.txt
 ```
 
-### 2. 运行政策监控
+### 2. 政策监控（抓取 + 匹配）
 
 ```bash
 # 全国级别（47 个数据源）
@@ -39,40 +70,54 @@ cd policy_monitor && python main.py run
 # 指定省市
 python main.py run --region 湖北
 
-# 指定单一源抓取（提高时效）
-python main.py run --source "国务院-农业与种业"
-
 # 按产业分类筛选
 python main.py run --industry strategic_emerging
 ```
 
-### 3. 按需分析 (Upload-First)
-
-```bash
-# 分析单个政策 URL
-python main.py scan --url "https://www.gov.cn/..."
-
-# 分析本地政策文件 (PDF/Text)
-python main.py scan --file policy.pdf
-```
-
-### 4. 运行企业匹配
+### 3. 企业匹配
 
 ```bash
 python enterprise_matcher.py --enterprise enterprises/{企业简称}/profile.yaml
 ```
 
-### 4. 使用 AI 分析（对话驱动）
+### 4. Skill 模式
 
-在任意支持文件对话的 AI 工具（牛马AI / Claude Code / Trae / WorkBuddy）中打开本项目文件夹，AI 会自动读取 `CLAUDE.md` 获得完整分析能力。
+```bash
+# 启动 REST API 服务（Dify/Coze 集成）
+python policy_matcher_cli.py server
 
+# 启动 MCP 服务（Trae/Cursor 集成）
+python policy_matcher_cli.py mcp
+
+# 导出 OpenAPI 规范
+python skills_api/export_openapi.py
 ```
-用户："帮我分析这个政策 [链接/PDF/文本]"
-→ AI 自动执行六步工作流
-→ 输出 .md 分析报告
 
-用户："对 [具体业务] 有什么影响？"
-→ 追问式深度分析
+### 5. Agent 模式（对话驱动）
+
+```bash
+# 设置 LLM API Key
+set OPENAI_API_KEY=your-api-key       # Windows
+export OPENAI_API_KEY=your-api-key    # Linux/Mac
+
+# 交互式对话
+python policy_matcher_cli.py chat -e jyuh
+
+# 自动扫描报告
+python policy_matcher_cli.py agent-scan -e jyuh
+```
+
+### 6. 用户上传政策匹配
+
+```bash
+# URL 解析
+python policy_matcher_cli.py match -e jyuh --url https://example.gov.cn/policy/001
+
+# 文件解析
+python policy_matcher_cli.py match -e jyuh --file policy.txt
+
+# 文本解析
+python policy_matcher_cli.py match -e jyuh --text "关于加快推进人工智能..."
 ```
 
 ---
@@ -81,35 +126,61 @@ python enterprise_matcher.py --enterprise enterprises/{企业简称}/profile.yam
 
 ```
 EcoPolicy-AI/
-├── CLAUDE.md                        AI 助手指令文件（核心）
+├── policy_matcher_cli.py            CLI 统一入口（所有模式）
+├── enterprise_matcher.py            企业匹配引擎（8 个行业维度）
+├── security_review.py               安全审查脚本（.gitignore 感知）
 │
-├── config/                          框架配置
-│   ├── company_profile_template.yaml    企业画像模板
-│   ├── policy_matrix_generator.md       行业分析框架
-│   └── output_standards.md              输出规范
+├── ai_agent/                        智能体模块（Agent 模式）
+│   ├── llm.py                          大模型协议客户端（OpenAI 格式）
+│   ├── tools.py                        统一工具层（API/MCP/Agent 共享）
+│   ├── analyst.py                      ReAct 自主控制环
+│   └── chat.py                         交互对话终端
+│
+├── skills_api/                      技能服务模块（Skill 模式）
+│   ├── server.py                       FastAPI REST 服务端
+│   ├── mcp_server.py                   MCP JSON-RPC 2.0 服务端
+│   └── export_openapi.py              OpenAPI 导出工具
 │
 ├── policy_monitor/                  政策抓取工具
-│   ├── main.py                          CLI 入口
-│   ├── database.py                      SQLite 存储
-│   ├── fetcher.py                       安全 HTTP 客户端
-│   ├── matcher.py                       关键词匹配器
-│   ├── config.yaml                      37 个数据源配置
-│   ├── industries.yaml                  5 大产业分类 / 43 个子行业
-│   ├── parsers/                         2 种解析器（API / HTML）
-│   └── regions/                         31 省区域配置
+│   ├── main.py                         CLI 入口
+│   ├── database.py                     SQLite 存储
+│   ├── fetcher.py                      安全 HTTP 客户端
+│   ├── matcher.py                      关键词匹配器（jieba 分词 + 同义词）
+│   ├── config.yaml                     47 个数据源配置
+│   ├── industries.yaml                 5 大产业分类 / 43 个子行业
+│   ├── parsers/                        3 种解析器（API / HTML / 用户上传）
+│   └── regions/                        31 省区域配置
 │
-├── enterprises/                     企业画像库
-│   └── _template/                       空白模板
+├── config/                          框架配置
+│   ├── company_profile_template.yaml   企业画像模板
+│   ├── policy_matrix_generator.md      行业分析框架
+│   └── output_standards.md             输出规范
 │
-├── enterprise_matcher.py            企业匹配引擎（8 个行业维度）
-├── report_generator.py              报告生成器（简报 + 深度分析模板）
-├── batch_matcher.py                 批量匹配引擎（多企业 x 全量政策排行榜）
-├── policy_tracker.py                政策历史版本追踪（变更检测 + 对比报告）
-├── policy_stacker.py                政策组合叠加分析（互补/互斥检测 + 组合优化 + 收入天花板）
-├── examples/                        示例产出（脱敏）
-├── security_review.py               安全审查脚本
-├── README.md / ROADMAP.md / project.md
-└── requirements.txt / .gitignore
+├── enterprises/                     企业画像库（gitignored）
+│   └── _template/                      空白模板
+│
+├── .trae/skills/                    Trae IDE 原生技能手册
+├── .codebuddy/skills/               CodeBuddy/WorkBuddy 原生技能手册
+│
+├── tests/                           测试套件（51 用例）
+│   ├── conftest.py                     公共 fixtures
+│   ├── test_enterprise_matcher.py      匹配引擎测试
+│   ├── test_parsers.py                 解析器测试
+│   └── test_skills_api.py             REST/MCP API 测试
+│
+├── config_schema.py                 Pydantic 配置校验
+├── exceptions.py                    自定义异常层级
+├── log_config.py                    结构化日志（UTF-8 安全）
+├── scheduler.py                     后台调度器
+├── skills_openapi.json              OpenAPI 规范定义
+├── report_generator.py              报告生成器
+├── batch_matcher.py                 批量匹配引擎
+├── policy_tracker.py                政策版本追踪
+├── policy_stacker.py                政策组合叠加分析
+├── CLAUDE.md                        AI 助手指令文件
+├── requirements.txt                 依赖清单
+├── ROADMAP.md                       路线图
+└── .gitignore                       安全排除规则
 ```
 
 ---
@@ -158,33 +229,6 @@ Step 1: 政策录入 -> Step 2: 画像匹配 -> Step 3: 多维拆解
 
 ---
 
-## 扩展指南
-
-### 添加新省份
-
-参考现有文件格式（如 `regions/beijing.yaml`）：
-
-```yaml
-name: "New Province"
-aliases: ["alias1", "alias2", "pinyin"]
-parent_province: null
-sources:
-  - name: "StateCouncil-ProvinceName"
-    url: "https://sousuo.www.gov.cn/search-gov/data?t=zhengcelibrary_gwyzcwjk&q=ProvinceName&..."
-    type: api
-    enabled: true
-```
-
-### 添加新行业
-
-编辑 `policy_monitor/industries.yaml`，在对应大类下新增子行业。
-
-### 添加新数据源
-
-编辑 `policy_monitor/config.yaml`，新增源配置。
-
----
-
 ## 安全策略
 
 | 措施 | 实现 |
@@ -194,16 +238,21 @@ sources:
 | **无 JS 执行** | 纯 HTTP 请求，不执行 JavaScript |
 | **无登录** | 所有数据源均为公开信息 |
 | **容错隔离** | 单源失败不影响其他源抓取 |
+| **推送前审查** | `security_review.py` 自动扫描（.gitignore 感知） |
 
 ---
 
 ## 技术栈
 
 - **Python 3.12+**
-- **requests** -- HTTP 客户端
-- **beautifulsoup4** + **lxml** -- HTML 解析
-- **PyYAML** -- 配置文件解析
-- **SQLite** -- 本地数据存储
+- **FastAPI** + **Uvicorn** — REST API 服务
+- **Pydantic** — 配置校验与数据模型
+- **requests** — HTTP 客户端
+- **beautifulsoup4** + **lxml** — HTML 解析
+- **jieba** — 中文分词
+- **PyYAML** — 配置文件解析
+- **SQLite** — 本地数据存储
+- **pytest** — 测试框架
 
 ---
 
@@ -213,64 +262,12 @@ MIT License
 
 ---
 
-## 路线图 (Roadmap)
+## 开发者
 
-### Phase 1：基础建设 [已完成]
+- **BoussinesqJ** — [GitHub](https://github.com/BoussinesqJ)
 
-- [x] 政策监控工具（抓取器 + 解析器 + 数据库）
-- [x] 37 个国家数据源 + 31 省级区域配置
-- [x] 产业分类体系（5 大类 / 43 个子行业）
-- [x] 企业画像模板（10 大维度 + 轻资产适配）
-- [x] 7 个行业专属分析框架（每个 40+ 关键词）
-- [x] 标准分析工作流（6 步）
-- [x] 输出规范（5/5 分制评分、P0/P1/P2 优先级）
-- [x] CLI 英文化
+如有问题或建议，请提交 [Issue](https://github.com/BoussinesqJ/EcoPolicy-AI/issues)。
 
-### Phase 2：验证与优化 [已完成]
+---
 
-- [x] 多行业案例验证（5 个行业）
-- [x] GitHub 仓库搭建并推送
-- [x] +12 个政策数据源（药监局/医保局/数据局等）
-- [x] 行业深度深挖 + 轻资产适配
-- [x] 反馈机制 + 定时调度 + 安全审查脚本
-- [x] 31 省数据源全覆盖
-- [x] 多企业档案隔离验证（跨行业企业对比验证）
-- [x] 匹配器 bug 修复（煤炭能源误判/种业单字符/地址截断/轻资产误判/关键词去重）
-
-### Phase 2.5：架构精简 [已完成]
-
-- [x] 删除 agent/ 整个模块（10 个文件），AI 对话引擎天然处理
-- [x] 核心逻辑提升到根目录（enterprise_matcher.py + report_generator.py）
-- [x] config/ 从 6 个文件精简为 3 个核心文件
-- [x] 移除未使用的解析器（rss_parser + sitemap_parser）
-- [x] 增强 CLAUDE.md（吸收 agent config + 使用指南 + 安全规则）
-
-### Phase 3：Agent 增强 [已完成]
-
-- [x] 多轮对话支持（context.py + chat.py，已实现）
-- [x] 申报草稿自动生成（模板化框架 + 脱敏示例）
-- [x] 批量匹配（batch_matcher.py：多企业 x 全量政策排行榜 + 汇总报告）
-- [x] 政策历史版本对比（policy_tracker.py：快照追踪 + 变更检测 + 对比报告）
-- [x] 政策组合叠加分析（policy_stacker.py：互补/互斥检测 + 3 策略组合优化 + 收入天花板）
-- [x] 六层评价体系（v4.0）
-  - [x] 维度评分 + ASCII 雷达图 + 可调权重
-  - [x] 成功概率动态估算（8项资质 + 政策级别竞争度 + 行业热度修正）
-  - [x] ROI 量化评估（按政策类型真实约束计算，64 行业基准）
-  - [x] 提升路径自动生成 + 人工偏好过滤
-  - [x] 快速淘汰机制（四维全零跳过深层分析）
-  - [x] 不推荐原因自动生成
-  - [x] 煤炭能源行业关键词扩展（+10 生态修复）
-  - [x] 政策命中率优化：多关键词AND搜索→单关键词、jieba分词+同义词扩展、多字段匹配
-  - [x] 数据源成功率从34%提升至100%，命中率从9.5%提升至51.3%
-
-### Phase 4：界面与 API [计划中]
-
-- [ ] Web UI
-- [ ] REST API
-- [ ] 邮件/微信通知
-
-### Phase 5：社区与扩展 [计划中]
-
-- [ ] 更多行业模板
-- [ ] 多语言支持
-- [ ] 插件架构
+*最后更新: 2026-05-26*

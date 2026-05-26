@@ -600,3 +600,16 @@ safety:
 scoring:
   p0_threshold: 6
   p1_threshold: 3
+
+# ============================================================
+# 定时任务配置 (Phase C)
+# ============================================================
+scheduler:
+  enabled: false
+  enterprise_id: ""          # 默认匹配的企业 ID
+  region: null               # 默认抓取的地区（null = 全国）
+  industry: null             # 默认产业分类（null = 全部）
+  schedule_type: "daily_8am" # daily_8am / weekly_monday
+  auto_report: true          # 自动生成报告
+  report_max_count: 5        # 每次最多生成报告数
+  notify_email: null         # 通知邮箱（可选）
