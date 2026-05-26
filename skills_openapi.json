@@ -1,0 +1,629 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "EcoPolicy-AI Skills API",
+    "description": "将经济政策抓取、匹配、评估、堆叠规划能力包装为标准 API 技能工具箱",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/": {
+      "get": {
+        "summary": "Read Root",
+        "operationId": "read_root__get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "summary": "Health Check",
+        "operationId": "health_check_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/skills/fetch_url": {
+      "post": {
+        "summary": "网页政策抓取技能",
+        "operationId": "api_fetch_url_api_skills_fetch_url_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FetchUrlRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/skills/parse_file": {
+      "post": {
+        "summary": "本地政策文件解析技能",
+        "operationId": "api_parse_file_api_skills_parse_file_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ParseFileRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/skills/upload_file": {
+      "post": {
+        "summary": "HTTP 文件上传并解析技能",
+        "description": "上传文件并解析（支持 PDF、Word、TXT），常用于 Dify/Coze 平台用户直接上传附件",
+        "operationId": "api_upload_file_api_skills_upload_file_post",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_api_upload_file_api_skills_upload_file_post"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/skills/match": {
+      "post": {
+        "summary": "企业-政策匹配评估技能",
+        "operationId": "api_match_api_skills_match_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MatchRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/skills/calculate_roi": {
+      "post": {
+        "summary": "政策申报财务 ROI 测算技能",
+        "operationId": "api_calculate_roi_api_skills_calculate_roi_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CalculateROIRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/skills/optimize_stacking": {
+      "post": {
+        "summary": "多政策互斥与组合叠加规划技能",
+        "operationId": "api_optimize_stacking_api_skills_optimize_stacking_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StackingRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/skills/write_report": {
+      "post": {
+        "summary": "Markdown 分析报告生成与工作区保存技能",
+        "operationId": "api_write_report_api_skills_write_report_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WriteReportRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/skills/save_profile": {
+      "post": {
+        "summary": "保存或更新企业画像技能",
+        "operationId": "api_save_profile_api_skills_save_profile_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveProfileRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Body_api_upload_file_api_skills_upload_file_post": {
+        "properties": {
+          "file": {
+            "type": "string",
+            "contentMediaType": "application/octet-stream",
+            "title": "File"
+          }
+        },
+        "type": "object",
+        "required": [
+          "file"
+        ],
+        "title": "Body_api_upload_file_api_skills_upload_file_post"
+      },
+      "CalculateROIRequest": {
+        "properties": {
+          "enterprise_id": {
+            "type": "string",
+            "title": "Enterprise Id",
+            "description": "企业 ID，如 'jyuh'"
+          },
+          "policy_title": {
+            "type": "string",
+            "title": "Policy Title",
+            "description": "政策标题"
+          },
+          "policy_summary": {
+            "type": "string",
+            "title": "Policy Summary",
+            "description": "政策摘要或内容"
+          },
+          "success_probability": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Success Probability",
+            "description": "申报成功概率（0.0 至 1.0）"
+          }
+        },
+        "type": "object",
+        "required": [
+          "enterprise_id",
+          "policy_title",
+          "policy_summary",
+          "success_probability"
+        ],
+        "title": "CalculateROIRequest"
+      },
+      "FetchUrlRequest": {
+        "properties": {
+          "url": {
+            "type": "string",
+            "title": "Url",
+            "description": "要抓取解析的政策网页 URL 链接"
+          }
+        },
+        "type": "object",
+        "required": [
+          "url"
+        ],
+        "title": "FetchUrlRequest"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "MatchRequest": {
+        "properties": {
+          "enterprise_id": {
+            "type": "string",
+            "title": "Enterprise Id",
+            "description": "企业 ID，如 'jyuh'"
+          },
+          "policy_title": {
+            "type": "string",
+            "title": "Policy Title",
+            "description": "政策标题"
+          },
+          "policy_summary": {
+            "type": "string",
+            "title": "Policy Summary",
+            "description": "政策摘要或内容"
+          },
+          "policy_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Policy Url",
+            "description": "可选。政策网页链接",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "required": [
+          "enterprise_id",
+          "policy_title",
+          "policy_summary"
+        ],
+        "title": "MatchRequest"
+      },
+      "ParseFileRequest": {
+        "properties": {
+          "file_path": {
+            "type": "string",
+            "title": "File Path",
+            "description": "本地服务器上的政策文档文件相对/绝对路径"
+          }
+        },
+        "type": "object",
+        "required": [
+          "file_path"
+        ],
+        "title": "ParseFileRequest"
+      },
+      "SaveProfileRequest": {
+        "properties": {
+          "enterprise_id": {
+            "type": "string",
+            "title": "Enterprise Id",
+            "description": "企业 ID，例如 'tencent'"
+          },
+          "profile_yaml": {
+            "type": "string",
+            "title": "Profile Yaml",
+            "description": "格式完备的 YAML 企业画像内容"
+          }
+        },
+        "type": "object",
+        "required": [
+          "enterprise_id",
+          "profile_yaml"
+        ],
+        "title": "SaveProfileRequest"
+      },
+      "StackingPolicyInput": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "title": "Title",
+            "description": "政策标题"
+          },
+          "summary": {
+            "type": "string",
+            "title": "Summary",
+            "description": "政策摘要或内容"
+          },
+          "url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Url",
+            "description": "可选。政策链接",
+            "default": ""
+          },
+          "success_probability": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Success Probability",
+            "description": "可选。申报成功概率"
+          },
+          "recommendation_score": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Recommendation Score",
+            "description": "可选。推荐等级分数"
+          }
+        },
+        "type": "object",
+        "required": [
+          "title",
+          "summary"
+        ],
+        "title": "StackingPolicyInput"
+      },
+      "StackingRequest": {
+        "properties": {
+          "enterprise_id": {
+            "type": "string",
+            "title": "Enterprise Id",
+            "description": "企业 ID，如 'jyuh'"
+          },
+          "policies": {
+            "items": {
+              "$ref": "#/components/schemas/StackingPolicyInput"
+            },
+            "type": "array",
+            "title": "Policies",
+            "description": "要进行叠加优化组合分析的政策列表"
+          }
+        },
+        "type": "object",
+        "required": [
+          "enterprise_id",
+          "policies"
+        ],
+        "title": "StackingRequest"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      },
+      "WriteReportRequest": {
+        "properties": {
+          "enterprise_id": {
+            "type": "string",
+            "title": "Enterprise Id",
+            "description": "企业 ID，如 'jyuh'"
+          },
+          "filename": {
+            "type": "string",
+            "title": "Filename",
+            "description": "保存的文件名，如 'policy_analysis_report.md'"
+          },
+          "markdown_content": {
+            "type": "string",
+            "title": "Markdown Content",
+            "description": "完整的 Markdown 报告文本内容"
+          }
+        },
+        "type": "object",
+        "required": [
+          "enterprise_id",
+          "filename",
+          "markdown_content"
+        ],
+        "title": "WriteReportRequest"
+      }
+    }
+  }
+}

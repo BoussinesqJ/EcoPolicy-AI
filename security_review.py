@@ -13,6 +13,7 @@ import os
 import re
 import sys
 import argparse
+import subprocess
 from pathlib import Path
 from collections import defaultdict
 
@@ -171,6 +172,25 @@ class SecurityScanner:
             "medium": 0,
             "low": 0,
         }
+        self._gitignore_cache = {}
+
+    def _is_gitignored(self, path):
+        """Check if a file/directory is gitignored using git check-ignore."""
+        rel = str(Path(path).relative_to(self.repo_path))
+        if rel in self._gitignore_cache:
+            return self._gitignore_cache[rel]
+        try:
+            result = subprocess.run(
+                ["git", "check-ignore", "-q", rel],
+                cwd=str(self.repo_path),
+                capture_output=True,
+                timeout=5,
+            )
+            ignored = result.returncode == 0
+        except Exception:
+            ignored = False
+        self._gitignore_cache[rel] = ignored
+        return ignored
 
     def scan(self):
         """Run all scans."""
@@ -200,7 +220,7 @@ class SecurityScanner:
         """Check for blocked file types."""
         print("[Phase 1] Checking file types...")
         for f in self.repo_path.rglob("*"):
-            if f.is_file():
+            if f.is_file() and not self._is_gitignored(f):
                 ext = f.suffix.lower()
                 name = f.name.lower()
                 if ext in BLOCKED_EXTENSIONS or name in SENSITIVE_FILES:
@@ -219,7 +239,7 @@ class SecurityScanner:
         """Scan all text file contents for patterns."""
         print("[Phase 2] Scanning file contents...")
         for f in self.repo_path.rglob("*"):
-            if not f.is_file():
+            if not f.is_file() or self._is_gitignored(f):
                 continue
             ext = f.suffix.lower()
             # Only scan text files
@@ -276,7 +296,7 @@ class SecurityScanner:
         """Check for blocked directories."""
         print("[Phase 3] Checking directories...")
         for d in self.repo_path.rglob("*"):
-            if d.is_dir() and d.name in BLOCKED_DIRECTORIES and d.name != ".git":
+            if d.is_dir() and d.name in BLOCKED_DIRECTORIES and d.name != ".git" and not self._is_gitignored(d):
                 rel = d.relative_to(self.repo_path)
                 self.findings["blocked_dir"].append({
                     "file": str(rel),
@@ -292,7 +312,7 @@ class SecurityScanner:
         """Check for sensitive filenames."""
         print("[Phase 4] Checking sensitive filenames...")
         for f in self.repo_path.rglob("*"):
-            if f.is_file() and f.name.lower() in {s.lower() for s in SENSITIVE_FILES}:
+            if f.is_file() and f.name.lower() in {s.lower() for s in SENSITIVE_FILES} and not self._is_gitignored(f):
                 rel = f.relative_to(self.repo_path)
                 self.findings["sensitive_file"].append({
                     "file": str(rel),

@@ -3,10 +3,8 @@
 ## Phase 1：基础建设 [已完成]
 
 - [x] 政策监控工具（抓取器 + 解析器 + 数据库）
-- [x] 47 个国家数据源（国务院 API x 42 + 已验证 HTML x 5）
+- [x] 37 个国家数据源（国务院 API x 32 + 已验证 HTML x 5）
 - [x] 31 个省级区域配置（全部大陆省级行政区/直辖市/自治区）
-- [x] "Upload-First" 策略：支持 scan --url 和 scan --file 快速单点分析
-- [x] 单源定向抓取：支持 run --source 过滤器
 - [x] 产业分类体系（5 大类 / 43 个子行业）
 - [x] 企业匹配引擎 + 报告生成器（可独立运行）
 - [x] 企业画像模板（10 大维度 + 轻资产商业模式字段）
@@ -56,6 +54,24 @@
   - [x] 煤炭能源行业关键词扩展（+10 生态修复相关关键词）
   - [x] 政策命中率优化（单关键词搜索 + jieba分词 + 同义词扩展 + 多字段匹配）
   - [x] 数据源成功率 34% → 100%，命中率 9.5% → 51.3%
+
+## Phase 3.5：用户上传与调度 [已完成]
+
+- [x] Phase A: 用户上传政策匹配
+  - [x] URL 解析（自动抓取网页内容，适配政府网站）
+  - [x] 文件解析（PDF/Word/纯文本，多编码支持）
+  - [x] 文本解析（直接粘贴政策内容）
+  - [x] CLI 入口（policy_matcher_cli.py match 命令）
+- [x] Phase B: 手动触发抓取 + 匹配
+  - [x] scan 命令（触发 policy_monitor 抓取 + 企业匹配）
+  - [x] 支持 --region 和 --industry 参数筛选
+  - [x] 数据库新增 get_recent_policies 方法
+- [x] Phase C: 定时扫描
+  - [x] scheduler.py（Python 调度器，基于 schedule 库）
+  - [x] config.yaml 新增 scheduler 配置段
+  - [x] Windows Task Scheduler XML 生成
+  - [x] Linux crontab 条目生成
+  - [x] schedule 命令（--show/--install/--remove）
 
 ## Phase 4：界面与 API [计划中]
 

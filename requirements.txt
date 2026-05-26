@@ -1,5 +1,32 @@
-requests>=2.31.0
-beautifulsoup4>=4.12.0
-lxml>=5.0.0
-PyYAML>=6.0
-schedule>=1.2.0
+# ============================================================
+# EcoPolicy-AI 依赖配置
+# ============================================================
+# 核心依赖
+requests==2.31.0
+beautifulsoup4==4.12.0
+lxml==5.0.0
+PyYAML==6.0
+schedule==1.2.0
+
+# PDF 解析（用户上传功能）
+PyPDF2==3.0.1
+
+# Word 文档解析（用户上传功能）
+python-docx==1.1.0
+
+# 配置验证
+pydantic==2.5.0
+
+# 开发依赖（测试）
+pytest==9.0.0
+
+# 可选：PDF 报告生成（Phase 4）
+# weasyprint==60.0
+
+# 可选：Web API（Phase 4）
+fastapi==0.109.0
+uvicorn==0.27.0
+python-multipart==0.0.9
+
+# 可选：前端（Phase 4）
+# jinja2==3.1.3
