@@ -29,7 +29,8 @@ CREATE TABLE IF NOT EXISTS policies (
     score INTEGER DEFAULT 0,
     priority TEXT DEFAULT 'P2',  -- P0 / P1 / P2
     fetched_at TEXT NOT NULL,
-    analyzed INTEGER DEFAULT 0   -- 0=未分析, 1=已分析
+    analyzed INTEGER DEFAULT 0,  -- 0=未分析, 1=已分析
+    industry_tags TEXT DEFAULT '[]'  -- JSON array: 行业标签（去重时追加）
 );
 
 CREATE INDEX IF NOT EXISTS idx_date ON policies(date);
@@ -95,22 +96,34 @@ class PolicyDatabase:
         """
         插入一条政策记录。
         返回 True 表示新记录，False 表示已存在（去重）。
+        如果已存在且有新行业标签，合并标签。
         """
         h = url_hash(policy["url"])
+        new_tags = policy.get("industry_tags", [])
 
         # 检查是否已存在
         row = self.conn.execute(
-            "SELECT url_hash FROM policies WHERE url_hash = ?", (h,)
+            "SELECT url_hash, industry_tags FROM policies WHERE url_hash = ?", (h,)
         ).fetchone()
         if row:
-            logger.debug(f"已存在，跳过: {policy['title'][:40]}")
+            # 合并行业标签（去重）
+            if new_tags:
+                existing_tags = json.loads(row["industry_tags"] or "[]")
+                merged = list(set(existing_tags + new_tags))
+                if len(merged) > len(existing_tags):
+                    self.conn.execute(
+                        "UPDATE policies SET industry_tags = ? WHERE url_hash = ?",
+                        (json.dumps(merged, ensure_ascii=False), h),
+                    )
+                    self.conn.commit()
+                    logger.debug(f"标签合并: {policy['title'][:40]} +{new_tags}")
             return False
 
         self.conn.execute(
             """INSERT INTO policies
                (url_hash, title, url, date, source, summary,
-                keywords_matched, score, priority, fetched_at)
-               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                keywords_matched, score, priority, fetched_at, industry_tags)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
             (
                 h,
                 policy.get("title", ""),
@@ -122,6 +135,7 @@ class PolicyDatabase:
                 policy.get("score", 0),
                 policy.get("priority", "P2"),
                 policy.get("fetched_at", now_iso()),
+                json.dumps(new_tags, ensure_ascii=False) if new_tags else "[]",
             ),
         )
         self.conn.commit()

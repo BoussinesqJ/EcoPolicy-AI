@@ -27,7 +27,7 @@ from database import PolicyDatabase
 from matcher import KeywordMatcher, IndustryMatcher, combined_match
 from notifier import Notifier
 from region_loader import get_sources_for_region, list_all_regions
-from parsers import parse_html, parse_api
+from parsers import parse_html, parse_api, parse_npc
 from utils import now_iso, today_str
 
 # ============================================================
@@ -149,6 +149,10 @@ def run_fetch(config: dict, region: str = None, industry: str = None):
                         break
                     all_policies.extend(page_policies)
                     logger.info(f"  第 {page + 1} 页: 抓取 {len(page_policies)} 条")
+            elif source_type == "npc_html":
+                # 中国人大网专用解析器
+                html = fetcher.fetch(source_url, source_type="html")
+                all_policies = parse_npc(source_url, html, source_name) if html else []
             elif source_type in ("rss", "sitemap"):
                 logger.warning(f"数据源 {source_name} 类型 {source_type} 已废弃，跳过抓取")
                 all_policies = []
@@ -158,6 +162,8 @@ def run_fetch(config: dict, region: str = None, industry: str = None):
                 all_policies = parse_html(source_url, html, source_name, selectors) if html else []
 
             # 组合匹配：全局关键词 + 产业分类
+            # 如果数据源配置了行业标签，附加到所有政策上
+            source_industry_tag = source.get("industry_tag", "")
             for p in all_policies:
                 result = combined_match(
                     p["title"],
@@ -176,6 +182,10 @@ def run_fetch(config: dict, region: str = None, industry: str = None):
                     top_industry = result["industry_matched"][0]
                     p["industry"] = f"{top_industry['category']} > {top_industry['name']}"
                     p["industry_keywords"] = top_industry["keywords"]
+
+                # 附加数据源行业标签（用于去重时保留行业归属）
+                if source_industry_tag:
+                    p["industry_tags"] = [source_industry_tag]
 
             # 存入数据库
             new_count = db.insert_batch(all_policies)

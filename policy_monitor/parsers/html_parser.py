@@ -70,7 +70,7 @@ def parse_html(url: str, html_content: str, source_name: str, selectors: dict) -
             continue
 
         # 过滤非政策链接（导航、页脚等）
-        if _is_navigation(title):
+        if _is_navigation(title, href):
             continue
 
         # 尝试从链接周围提取日期
@@ -89,11 +89,19 @@ def parse_html(url: str, html_content: str, source_name: str, selectors: dict) -
     return policies
 
 
-def _is_navigation(title: str) -> bool:
+def _is_navigation(title: str, href: str = "") -> bool:
     """判断是否为导航链接（非政策内容）"""
     # 核心规则：政策标题通常 > 12 字符，短标题几乎都是导航项
     if len(title) <= 12:
         return True
+
+    # URL 模式过滤：纯分类页/索引页链接
+    if href:
+        # 以 / 结尾的纯目录链接（无具体文件名）
+        if href.rstrip("/").endswith("/index") or href.endswith("/"):
+            # 除非 URL 包含日期模式（真实政策链接）
+            if not re.search(r"/\d{6}/", href):
+                return True
 
     nav_keywords = [
         "首页", "上一页", "下一页", "尾页", "更多", "返回",
@@ -104,6 +112,9 @@ def _is_navigation(title: str) -> bool:
         "新闻动态", "司局机构", "科技视频", "科普服务",
         "在线办事", "互动平台", "职能介绍", "部长信箱",
         "舆论场", "政策解读", "公开目录",
+        # 政府网站常见分类标签（非政策）
+        "发改委令", "规范性文件", "规划文本", "规章文件",
+        "政府信息公开", "政务公开", "文件发布",
     ]
     for kw in nav_keywords:
         if title == kw or title.startswith(kw):

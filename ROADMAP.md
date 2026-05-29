@@ -134,9 +134,18 @@
 - [x] **数据看板**
   - [x] Streamlit 4-Tab 看板（总览/政策明细/企业匹配/系统运行）
   - [x] 直接读取 SQLite，零侵入现有代码
+- [x] **数据源扩展（v5.0 → v5.1）**
+  - [x] 国务院 API body 全文搜索（searchfield=title → body，效果提升 12x）
+  - [x] 产业专项关键词扩展（+13 个：新能源汽车/动力电池/集成电路等）
+  - [x] HTML 源修复（发改委/农业农村部 CSS 选择器修复）
+  - [x] 中国人大网独立数据源（npc_parser.py 专用解析器，+113 条法律法规）
+  - [x] 行业标签关联（15 个行业源自动打标签，去重时合并 industry_tags）
+  - [x] policies 表新增 industry_tags 字段（JSON 数组）
+  - [x] 政策库 415 → 743 条（+79%），50 个有效源
 
 ## Phase 5：Web UI 与通知 [计划中]
 
+- [ ] Selenium Headless Browser（解锁工信部/国资委等 JS 渲染站）
 - [ ] Web 管理界面（Vue / React 前端 + FastAPI 后端）
 - [ ] 政策推送通知（邮件 / 微信 / 企业微信 / 钉钉）
 - [ ] PDF 报告生成（兼容中文 CJK）
