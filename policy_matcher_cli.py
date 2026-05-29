@@ -24,6 +24,7 @@ EcoPolicy AI — 政策匹配工具
 
 import sys
 import os
+import logging
 import argparse
 import subprocess
 from pathlib import Path
@@ -255,7 +256,6 @@ def cmd_scan(args):
 
     # 从数据库读取最新政策并匹配
     from policy_monitor.database import PolicyDatabase
-    from policy_monitor.config import load_config
 
     config_path = BASE_DIR / "policy_monitor" / "config.yaml"
     import yaml

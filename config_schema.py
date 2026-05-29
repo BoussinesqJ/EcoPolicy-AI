@@ -163,6 +163,49 @@ class RegionsInfo(BaseModel):
     overseas_markets: List[str] = []
 
 
+class BusinessModelInfo(BaseModel):
+    """商业模式（v3.0 新增）"""
+    model_type: str = ""
+    revenue_model: Optional[str] = None
+    key_metrics: List[str] = []
+    digital_assets: List[str] = []
+    has_production_base: bool = True
+
+
+class ProductionInfo(BaseModel):
+    """生产与资产（重资产企业必填）"""
+    production_bases: List[Dict[str, Any]] = []
+    total_land_area: Optional[float] = None
+    annual_production_capacity: Optional[str] = None
+    supply_chain_description: Optional[str] = None
+
+
+class FinancialYear(BaseModel):
+    """单年度财务数据"""
+    year: int
+    total_assets: Optional[float] = None
+    total_liabilities: Optional[float] = None
+    revenue: Optional[float] = None
+    net_profit: Optional[float] = None
+    tax_paid: Optional[float] = None
+
+
+class FinancialsInfo(BaseModel):
+    """财务概况（近3年）"""
+    year_1: Optional[FinancialYear] = None
+    year_2: Optional[FinancialYear] = None
+    year_3: Optional[FinancialYear] = None
+
+
+class SocialValueInfo(BaseModel):
+    """社会价值与 ESG"""
+    employment_impact: Optional[int] = None
+    farmer_beneficiaries: Optional[int] = None
+    poverty_relief: bool = False
+    environmental_measures: List[str] = []
+    social_responsibility: List[str] = []
+
+
 class StrategyInfo(BaseModel):
     """战略方向"""
     short_term_goals: List[str] = []
@@ -171,14 +214,28 @@ class StrategyInfo(BaseModel):
     policy_needs: List[str] = []
 
 
+class CapitalInfo(BaseModel):
+    """资本状态"""
+    current_stage: Optional[str] = None
+    investors: List[str] = []
+    latest_valuation: Optional[float] = None
+    ipo_plan: Optional[str] = None
+    target_board: Optional[str] = None
+
+
 class EnterpriseProfile(BaseModel):
     """企业画像完整配置"""
     basic_info: BasicInfo
     industry: IndustryInfo
     qualifications: Qualifications = Qualifications()
     innovation: Optional[InnovationInfo] = None
+    business_model: Optional[BusinessModelInfo] = None
+    production: Optional[ProductionInfo] = None
+    financials: Optional[FinancialsInfo] = None
     regions: RegionsInfo = RegionsInfo()
+    social_value: Optional[SocialValueInfo] = None
     strategy: StrategyInfo = StrategyInfo()
+    capital: Optional[CapitalInfo] = None
 
 
 # ============================================================

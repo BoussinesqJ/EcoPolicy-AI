@@ -78,7 +78,7 @@ EcoPolicy-AI/
 │   └── output_standards.md              输出规范
 ├── policy_monitor/              政策抓取工具（Python）
 │   ├── main.py                  CLI 入口
-│   ├── config.yaml              37 个数据源配置
+│   ├── config.yaml              47 个数据源配置
 │   ├── industries.yaml          5 大产业分类 / 43 个子行业
 │   └── regions/                 31 省区域配置
 ├── enterprises/                 企业画像库
@@ -90,6 +90,7 @@ EcoPolicy-AI/
 ├── report_generator.py          报告生成器（雷达图 + ROI + 提升路径）
 ├── batch_matcher.py             批量匹配引擎（多企业 x 全量政策）
 ├── policy_tracker.py            政策历史版本追踪（变更检测 + 对比报告）
+├── dashboard/app.py             数据看板（Streamlit + Plotly）
 ├── examples/                    脱敏示例
 ├── README.md / ROADMAP.md       文档
 └── security_review.py           安全审查脚本
@@ -135,7 +136,7 @@ EcoPolicy-AI/
 ### 5. 批量政策扫描
 
 ```bash
-# 全国级别（37 个源）
+# 全国级别（47 个源）
 cd policy_monitor && python main.py run
 
 # 指定省份
@@ -179,12 +180,13 @@ python policy_tracker.py report
 
 ## 政策监控配置
 
-### 数据源（37 个）
+### 数据源（47 个）
 
 | 类型 | 数量 | 说明 |
 |:--|:--:|:--|
-| 国务院 API | 20 | 多关键词搜索，覆盖所有部委 |
-| 国家部委 HTML | 5 | 生态环境部/自然资源部/财政部/应急管理部/科技部 |
+| 国务院 API | 32 | 多关键词搜索，覆盖所有部委 |
+| 国家部委 API | 10 | 药监局/医保局/数据局/央行/证监会等 |
+| 已验证 HTML | 5 | 生态环境部/自然资源部/财政部/应急管理部/科技部 |
 | 省级配置 | 31 | 全国 31 个省级行政区 |
 
 ### 产业分类（5 大类 / 43 个子行业）

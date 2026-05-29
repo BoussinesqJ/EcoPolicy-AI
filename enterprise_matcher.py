@@ -671,7 +671,7 @@ class EnterpriseMatcher:
 
         # v3.0 条件5: 生产资质检查（仅对重资产企业）
         if not is_asset_light:
-            has_production = basic.get("has_production_base", True)
+            has_production = biz_model.get("has_production_base", True)
             if "生产基地" in text and not has_production:
                 detail["生产能力"] = {"通过": False, "说明": "政策要求生产基地，企业不具备"}
                 # 不作为硬伤，但记录
@@ -853,19 +853,6 @@ class EnterpriseMatcher:
             matched_kw, opportunities, risks,
         )
 
-    def _calculate_recommendation(self, total_score: int) -> int:
-        """根据总分计算推荐等级（1-5）"""
-        if total_score >= 17:
-            return 5
-        elif total_score >= 13:
-            return 4
-        elif total_score >= 9:
-            return 3
-        elif total_score >= 5:
-            return 2
-        else:
-            return 1
-
     def _recommendation_text(self, score: int) -> str:
         """推荐等级文本"""
         mapping = {
@@ -899,7 +886,7 @@ class EnterpriseMatcher:
 
         # 2. 硬性条件不通过
         if not result.hard_conditions_pass:
-            failed = [k for k, v in result.hard_conditions_detail.items() if not v]
+            failed = [k for k, v in result.hard_conditions_detail.items() if not v.get("通过", False)]
             if failed:
                 reasons.append({
                     "type": "硬性条件不满足",
@@ -1016,6 +1003,7 @@ class EnterpriseMatcher:
             factors.append("已挂牌/上市: +5%")
 
         # 知识产权（v4.0 新增）
+        # 兼容两种格式：嵌套 dict {invention: N} 或模板扁平字段 invention_patents
         patents = innovation.get("patents", {})
         if isinstance(patents, dict):
             invention = patents.get("invention", 0)
@@ -1024,7 +1012,11 @@ class EnterpriseMatcher:
         elif isinstance(patents, int):
             total_patents = patents
         else:
-            total_patents = 0
+            # 兼容模板扁平字段格式
+            invention = innovation.get("invention_patents", 0)
+            utility = innovation.get("utility_patents", 0)
+            sw_copyrights = innovation.get("software_copyrights", 0)
+            total_patents = invention + utility + sw_copyrights
 
         if total_patents >= 10:
             qual_score += 0.06
@@ -1046,7 +1038,15 @@ class EnterpriseMatcher:
             factors.append(f"团队规模({employees}人): +2%")
 
         # 成立年限（v4.0 新增）
+        # 兼容两种格式：整数 founded_year 或日期字符串 establishment_date
         founded = basic.get("founded_year", 0)
+        if not founded:
+            est_date = basic.get("establishment_date", "")
+            if est_date and len(str(est_date)) >= 4:
+                try:
+                    founded = int(str(est_date)[:4])
+                except (ValueError, TypeError):
+                    founded = 0
         if founded > 0:
             years = 2026 - founded
             if years >= 5:

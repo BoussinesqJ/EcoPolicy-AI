@@ -1,7 +1,7 @@
 # EcoPolicy-AI 路线图 (Roadmap)
 
 **开发者**: [BoussinesqJ](https://github.com/BoussinesqJ)
-**最后更新**: 2026-05-26
+**最后更新**: 2026-05-29
 
 ---
 
@@ -113,6 +113,28 @@
   - [x] 安全审查 0 issues
   - [x] GitHub 推送（master 分支）
 
+## Phase 4.5：夯实基础 ✅
+
+- [x] **Sprint 1：Bug 修复 + 字段对齐**
+  - [x] 修复 `policy_matcher_cli.py` --verbose 崩溃（logging 未导入）
+  - [x] 修复 `enterprise_matcher.py` 不推荐原因永远为空（not v 判断错误）
+  - [x] 修复企业画像字段错位（patents/establishment_date/has_production_base）
+  - [x] 补全 config_schema.py 5 个缺失校验模块
+  - [x] 清理死代码和文档不一致
+- [x] **Sprint 2：测试补全（51 → 232 项）**
+  - [x] test_database.py — 28 项（CRUD/去重/匹配存储/Agent日志/导出）
+  - [x] test_roi_calculator.py — 22 项（政策分类/ROI计算/基准对比/报告格式化）
+  - [x] test_policy_stacker.py — 28 项（叠加规则/相似度/组合分析/互斥检测）
+  - [x] test_matcher_v4.py — 22 项（六层评价体系 v4.0 扩展功能）
+  - [x] test_batch_matcher.py — 12 项（批量匹配引擎/筛选/报告/错误处理）
+  - [x] test_policy_tracker.py — 25 项（快照/变更检测/通知/历史/统计/报告）
+  - [x] test_report_generator.py — 22 项（简报/深度分析/雷达图/概率条）
+  - [x] test_fetcher.py — 18 项（mock fetch/重试/robots/超时/错误处理）
+  - [x] 覆盖 11 个核心模块，0 失败
+- [x] **数据看板**
+  - [x] Streamlit 4-Tab 看板（总览/政策明细/企业匹配/系统运行）
+  - [x] 直接读取 SQLite，零侵入现有代码
+
 ## Phase 5：Web UI 与通知 [计划中]
 
 - [ ] Web 管理界面（Vue / React 前端 + FastAPI 后端）
@@ -140,4 +162,4 @@ MIT
 
 ---
 
-*最后更新: 2026-05-26*
+*最后更新: 2026-05-29*

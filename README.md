@@ -5,10 +5,10 @@
 
 [![Python 3.12+](https://img.shields.io/badge/Python-3.12+-blue.svg)](https://python.org)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![Tests](https://img.shields.io/badge/Tests-51%20passed-brightgreen.svg)]()
+[![Tests](https://img.shields.io/badge/Tests-232%20passed-brightgreen.svg)]()
 
 **开发者**: [BoussinesqJ](https://github.com/BoussinesqJ)
-**最后更新**: 2026-05-26
+**最后更新**: 2026-05-29
 
 ---
 
@@ -127,7 +127,16 @@ python policy_matcher_cli.py match -e jyuh --text "关于加快推进人工智�
 ```
 EcoPolicy-AI/
 ├── policy_matcher_cli.py            CLI 统一入口（所有模式）
-├── enterprise_matcher.py            企业匹配引擎（8 个行业维度）
+├── enterprise_matcher.py            企业匹配引擎（8 个行业维度 + 六层评价）
+├── roi_calculator.py                ROI 量化评估（64 个行业基准）
+├── policy_stacker.py                政策组合叠加分析（互补/互斥 + 收入天花板）
+├── batch_matcher.py                 批量匹配引擎（多企业 x 全量政策）
+├── policy_tracker.py                政策版本追踪（快照 + 变更检测）
+├── report_generator.py              报告生成器（简报 + 深度分析）
+├── config_schema.py                 Pydantic 配置校验
+├── exceptions.py                    自定义异常层级
+├── log_config.py                    结构化日志（UTF-8 安全）
+├── scheduler.py                     后台调度器
 ├── security_review.py               安全审查脚本（.gitignore 感知）
 │
 ├── ai_agent/                        智能体模块（Agent 模式）
@@ -143,13 +152,16 @@ EcoPolicy-AI/
 │
 ├── policy_monitor/                  政策抓取工具
 │   ├── main.py                         CLI 入口
-│   ├── database.py                     SQLite 存储
-│   ├── fetcher.py                      安全 HTTP 客户端
+│   ├── database.py                     SQLite 存储（3 张表 + 索引）
+│   ├── fetcher.py                      安全 HTTP 客户端（robots + 限速 + 重试）
 │   ├── matcher.py                      关键词匹配器（jieba 分词 + 同义词）
 │   ├── config.yaml                     47 个数据源配置
 │   ├── industries.yaml                 5 大产业分类 / 43 个子行业
 │   ├── parsers/                        3 种解析器（API / HTML / 用户上传）
 │   └── regions/                        31 省区域配置
+│
+├── dashboard/                       数据看板
+│   └── app.py                          Streamlit 4-Tab 看板
 │
 ├── config/                          框架配置
 │   ├── company_profile_template.yaml   企业画像模板
@@ -162,21 +174,21 @@ EcoPolicy-AI/
 ├── .trae/skills/                    Trae IDE 原生技能手册
 ├── .codebuddy/skills/               CodeBuddy/WorkBuddy 原生技能手册
 │
-├── tests/                           测试套件（51 用例）
+├── tests/                           测试套件（232 用例，10 个测试文件）
 │   ├── conftest.py                     公共 fixtures
-│   ├── test_enterprise_matcher.py      匹配引擎测试
+│   ├── test_enterprise_matcher.py      匹配引擎基础测试
+│   ├── test_matcher_v4.py              六层评价体系扩展测试
+│   ├── test_roi_calculator.py          ROI 量化评估测试
+│   ├── test_policy_stacker.py          组合叠加分析测试
+│   ├── test_database.py                SQLite 存储层测试
+│   ├── test_batch_matcher.py           批量匹配引擎测试
+│   ├── test_policy_tracker.py          政策变更追踪测试
+│   ├── test_report_generator.py        报告生成器测试
+│   ├── test_fetcher.py                 HTTP 抓取层测试
 │   ├── test_parsers.py                 解析器测试
 │   └── test_skills_api.py             REST/MCP API 测试
 │
-├── config_schema.py                 Pydantic 配置校验
-├── exceptions.py                    自定义异常层级
-├── log_config.py                    结构化日志（UTF-8 安全）
-├── scheduler.py                     后台调度器
 ├── skills_openapi.json              OpenAPI 规范定义
-├── report_generator.py              报告生成器
-├── batch_matcher.py                 批量匹配引擎
-├── policy_tracker.py                政策版本追踪
-├── policy_stacker.py                政策组合叠加分析
 ├── CLAUDE.md                        AI 助手指令文件
 ├── requirements.txt                 依赖清单
 ├── ROADMAP.md                       路线图
@@ -267,6 +279,7 @@ Phase 2.5 ████████████████████ 100%  架
 Phase 3   ████████████████████ 100%  分析引擎增强
 Phase 3.5 ████████████████████ 100%  用户上传与调度
 Phase 4   ████████████████████ 100%  Skill + Agent 双态架构
+Phase 4.5 ████████████████████ 100%  夯实基础（Bug修复+测试）
 Phase 5   ░░░░░░░░░░░░░░░░░░░░   0%  Web UI 与通知
 Phase 6   ░░░░░░░░░░░░░░░░░░░░   0%  社区与规模化
 ```
@@ -313,7 +326,7 @@ Phase 6   ░░░░░░░░░░░░░░░░░░░░   0%  社
 | 手动扫描 | `scan` 命令触发抓取 + 匹配 |
 | 定时调度 | `scheduler.py` + Windows Task Scheduler + Linux cron |
 
-### Phase 4：Skill + Agent 双态架构 ✅ ← 当前版本
+### Phase 4：Skill + Agent 双态架构 ✅
 
 | 里程碑 | 交付物 |
 |--------|--------|
@@ -323,6 +336,14 @@ Phase 6   ░░░░░░░░░░░░░░░░░░░░   0%  社
 | Agent — ReAct | 大模型客户端 + 自主推理环 + 交互对话终端 |
 | 统一工具层 | `ai_agent/tools.py` 三端共享（API/MCP/Agent） |
 | 基础设施 | Pydantic 校验 + 异常层级 + 结构化日志 + 51 项测试 |
+
+### Phase 4.5：夯实基础 ✅ ← 当前版本
+
+| 里程碑 | 交付物 |
+|--------|--------|
+| Sprint 1 — Bug 修复 | 3 个 P0 Bug 修复 + 企业画像字段对齐 + config_schema 补全 |
+| Sprint 2 — 测试补全 | 测试从 51 → 232 项，覆盖 11 个核心模块 |
+| 数据看板 | Streamlit 4-Tab 看板（总览/政策/匹配/系统） |
 
 ### Phase 5：Web UI 与通知 🔲 计划中
 
@@ -357,4 +378,4 @@ MIT License
 
 ---
 
-*最后更新: 2026-05-26*
+*最后更新: 2026-05-29*
